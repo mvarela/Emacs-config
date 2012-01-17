@@ -1,0 +1,878 @@
+#+TITLE: Personal Configs
+#+Author: Martin Varela
+#+SEQ_TODO: PROPOSED TODO STARTED | DONE DEFERRED REJECTED
+#+OPTIONS: H:2 num:nil toc:t
+#+STARTUP: oddeven
+
+* Personal information
+
+  #+begin_src emacs-lisp
+(setq user-full-name "Martin Varela")
+(setq user-mail-address "mvr.rennes@gmail.com")
+(setq mvr-elisp-root "~/.emacs.d")
+
+  #+end_src
+  
+
+* Local functions
+
+** Screen Transparency and Color Themes
+
+*** Color theme and chooser functions
+    #+begin_src emacs-lisp
+(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/djcb-elisp/themes/"))
+(load-theme 'zenburn t)
+    #+end_src
+
+
+*** Handling Transparency
+
+    #+begin_src emacs-lisp
+(defun make-frame-transparent ()
+  (interactive)
+  (set-frame-parameter nil 'alpha '(75 70)))
+
+(defun make-frame-opaque ()
+  (interactive)
+  (set-frame-parameter nil 'alpha '(100 100)))
+
+
+(set-frame-parameter (selected-frame) 'alpha '(100 100))
+(add-to-list 'default-frame-alist '(alpha 100 100))
+(eval-when-compile (require 'cl))
+(defun toggle-transparency ()
+  (interactive)
+  (if (/=
+	   (cadr (frame-parameter nil 'alpha))
+	   100)
+	  (make-frame-opaque)
+	  (make-frame-transparent)))
+
+    #+end_src
+
+    
+
+** Printing
+
+*** Print to pdf
+
+#+begin_src emacs-lisp
+  
+  (defun print-to-pdf ()
+    "Prints the current buffer to a pdf file"
+    (interactive)
+    (ps-spool-buffer-with-faces)
+    (switch-to-buffer "*PostScript*")
+    (write-file "/tmp/tmp.ps")
+    (kill-buffer "tmp.ps")
+    (setq cmd (concat "ps2pdf14 /tmp/tmp.ps " (buffer-name) ".pdf"))
+    (shell-command cmd)
+    (shell-command "rm /tmp/tmp.ps")
+    (message (concat "Saved to:  " (buffer-name) ".pdf")))
+  
+#+end_src emacs-lisp
+
+
+*** Toggles for headers and color printing
+
+#+begin_src emacs-lisp
+  (defun disable-print-headers ()  (interactive) (setq ps-print-header nil))
+  (defun enable-print-headers ()  (interactive) (setq ps-print-header 1))
+  (defun disable-color-printing ()  (interactive) (setq ps-print-color-p nil))
+  (defun enable-color-printing ()  (interactive) (setq ps-print-color-p 1)) 
+#+end_src
+
+** Frame maximization
+#+begin_src emacs-lisp
+  (defun get-frame-max-lines ()
+    (- 
+     (/ 
+      (* (- (display-pixel-height) 20) (frame-height)) 
+      (frame-pixel-height))
+     2))
+  
+  (defun get-frame-max-cols ()
+    (-
+     (/
+      (* (display-pixel-width) (frame-width))
+      (frame-pixel-width)) 
+     0  ))
+  
+  (defun maximize-frame () 
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (get-frame-max-cols) (get-frame-max-lines)))
+  
+  (defun half-frame-h ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (/ (get-frame-max-cols) 2) (get-frame-max-lines)))
+  
+  (defun half-frame-v ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (get-frame-max-cols) (/ (get-frame-max-lines)
+                                                           2)))
+  
+  (defun halve-frame-h ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (/ (frame-width) 2) (frame-height)))
+  
+  (defun halve-frame-v ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (frame-width) (/ (frame-height)
+                                                     2)))
+  
+  (maximize-frame)
+#+end_src
+
+
+
+** Window resizing
+
+#+begin_src emacs-lisp
+(defun shrink-window-two-thirds ()
+  (interactive)
+  (shrink-window-horizontally (truncate (* (get-frame-max-cols) 0.20))))
+#+end_src
+
+
+
+
+** Lorem Ipsum
+
+#+begin_src emacs-lisp
+(defun lorem ()
+  (interactive)
+  (insert "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Praesent libero orci, auctor sed, faucibus vestibulum, gravida vitae, arcu. Nunc posuere. Suspendisse potenti. Praesent in arcu ac nisl ultricies ultricies. Fusce eros. Sed pulvinar vehicula ante. Maecenas urna dolor, egestas vel, tristique et, porta eu, leo. Curabitur vitae sem eget arcu laoreet vulputate. Cras orci neque, faucibus et, rhoncus ac, venenatis ac, magna. Aenean eu lacus. Aliquam luctus facilisis augue. Nullam fringilla consectetuer sapien. Aenean neque augue, bibendum a, feugiat id, lobortis vel, nunc. Suspendisse in nibh quis erat condimentum pretium. Vestibulum tempor odio et leo. Sed sodales vestibulum justo. Cras convallis pellentesque augue. In eu magna. In pede turpis, feugiat pulvinar, sodales eget, bibendum consectetuer, magna. Pellentesque vitae augue."))
+#+end_src
+
+
+
+** Org-mode outline to FreeMind extraction
+
+This function extracts the outline from an org-mode file, with no contents under
+each header, and then converts that to a FreeMind mindmap.
+
+
+#+begin_src emacs-lisp
+(defun org-extract-mm ()
+  "Extracts the outline of an org-mode file and exports it as a Freemind mindmap"
+  (interactive)
+  (save-excursion
+    (let ((t-name (concat (buffer-name) "-freemind.mm"))
+          (target (get-buffer-create (concat (buffer-name) "-freemind.org"))) 
+          (title (re-search-forward "^#\+.*[tT]itle" (point-max) t)))
+      (if (not (null title))
+          (progn (goto-char title)
+                 (append-to-buffer target (line-beginning-position)(+ 1 (line-end-position)))))
+      (goto-char (point-min))
+      (while (re-search-forward "^\*" nil t nil)
+        (append-to-buffer (get-buffer target) (line-beginning-position)(+ 1 (line-end-position))))
+      (switch-to-buffer target)
+      (write-file t-name nil)
+      (org-freemind-from-org-mode (buffer-name) (concat "out-"(format-time-string "%Y-%m-%d-%H.%M.%S") t-name)))))
+#+end_src
+
+** Org-mode LaTeX export headers for reports
+
+#+begin_src emacs-lisp
+(defun mvr-org-latex-report-header ()
+"Inserts custom packages to be used in org-mode LaTeX exports of a certain type"
+(interactive)
+(insert-string "
+#+LATEX_HEADER: \\usepackage{float}
+#+LATEX_HEADER: \\usepackage{amssymb,amsfonts,amsmath,latexsym,setspace}
+#+LATEX_HEADER: \\usepackage{natbib,fancyhdr}
+#+LATEX_HEADER: \\usepackage{pdflscape}
+#+LATEX_HEADER: \\usepackage{mvrreport}
+#+LATEX_HEADER: \\runningheads{}{RUNNING TITLE GOES HERE}\n"))
+
+#+end_src
+
+
+** Make LaTeX tabular environments fit the page
+
+#+begin_src emacs-lisp
+(defun mvr-latex-table-fit-to-page ()
+  "Wrap the next tabular environment in a resizebox command, so that it does not spill out of the page"
+  (interactive)
+  (progn
+    (re-search-forward "^[\t ]*[\\]begin[\t ]*{[\t ]*tabular" (point-max) t)
+    (move-beginning-of-line nil)
+    (insert "\\resizebox{\\textwidth}{!}{\n")
+    (re-search-forward "[\\]end[\t ]*{[\t ]*tabular[\t ]*}" (point-max) t)
+    (insert "}")
+    ))
+
+#+end_src
+
+* Personalized options for different modes and packages
+
+
+** Highlighting changes
+
+   #+begin_src emacs-lisp
+     (global-highlight-changes-mode t)
+     (setq highlight-changes-visibility-initial-state nil)
+   #+end_src
+
+
+** Frame titles
+   #+begin_src emacs-lisp
+     (setq frame-title-format
+       '("emacs%@" (:eval (system-name)) ": " (:eval (if (buffer-file-name)
+                     (abbreviate-file-name (buffer-file-name))
+                       "%b")) " [%*]"))
+     
+   #+end_src
+
+   
+** Hooks for using text mode enhancements 
+
+   #+begin_src emacs-lisp
+          (add-hook 'latex-mode-hook 'flyspell-mode)
+          (add-hook 'org-mode-hook 'flyspell-mode)
+   #+end_src
+   
+
+
+** Haskell mode options
+
+   #+begin_src emacs-lisp 
+     (starter-kit-load "starter-kit-haskell.org")
+     
+     (load "haskell-site-file")
+     (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+     (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+     (add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
+     (add-hook 'haskell-mode-hook 'turn-off-auto-fill)
+     (setq haskell-literate-default 'tex)
+     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
+   #+end_src emacs-lisp
+
+
+** Org-mode options
+
+*** Setup the org-agenda files to be considered
+
+    #+begin_src emacs-lisp
+      (setq diary-file (concat mvr-elisp-root "/diary/diary"))
+      (setq org-agenda-include-diary t)
+      (setq org-agenda-files (file-expand-wildcards (concat mvr-elisp-root "/org-agenda-files/*.org")))
+    #+end_src emacs-lisp
+
+
+
+*** Org-agenda and iCal integration
+
+#+begin_src emacs-lisp
+(require 'org-mac-iCal)
+(setq org-agenda-custom-commands
+      '(("I" "Import diary from iCal" agenda ""
+         ((org-agenda-mode-hook
+           (lambda ()
+             (org-mac-iCal)))))))
+
+(add-hook 'org-agenda-cleanup-fancy-diary-hook
+          (lambda ()
+            (goto-char (point-min))
+            (save-excursion
+              (while (re-search-forward "^[a-z]" nil t)
+                (goto-char (match-beginning 0))
+                (insert "0:00-24:00 ")))
+            (while (re-search-forward "^ [a-z]" nil t)
+              (goto-char (match-beginning 0))
+              (save-excursion
+                (re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
+              (insert (match-string 0)))))
+#+end_src
+*** Org-agenda and appt integration
+
+This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html][this blog post]], with the display function replaced by my own.
+
+ #+begin_src emacs-lisp
+
+(setq
+  appt-message-warning-time 20 ;; warn 15 min in advance
+
+  appt-display-mode-line t     ;; show in the modeline
+  appt-display-format 'window) ;; use our func
+(appt-activate 1)              ;; active appt (appointment notification)
+(display-time)                 ;; time display is required for this...
+
+ ;; update appt each time agenda opened
+
+(add-hook 'org-finalize-agenda-hook 'org-agenda-to-appt)
+
+
+(defun mvr-display-appt (minutes current-time msg)
+  "Display appt messages"
+  (let ((gmsg 
+         (if (null (listp msg))
+             (format "In %s minutes: \n\t%s" minutes msg )
+             (format "In %s minutes: \n\t%s" 
+                     (if (listp minutes) 
+                         (car minutes)
+                       (minutes)) 
+                     (concat 
+                      (mapconcat '(lambda (x) (identity x)) msg "\n\t" ) "\n")))))
+    (growl "Reminder" gmsg)))
+
+(setq appt-disp-window-function (function mvr-display-appt))
+
+#+end_src 
+
+*** Ditaa jar location
+
+    #+begin_src emacs-lisp
+      (setq org-ditaa-jar-path
+                (concat mvr-elisp-root "/src/org/contrib/scripts/ditaa.jar"))
+     #+end_src emacs-lisp
+
+
+*** Org-babel Gnuplot support
+
+    #+begin_src emacs-lisp 
+             (org-babel-do-load-languages
+              'org-babel-load-languages
+               (cons '(gnuplot . t)
+                  org-babel-load-languages))
+    #+end_src emacs-lisp
+
+
+*** Org-babel org support
+
+    #+begin_src emacs-lisp 
+      (org-babel-do-load-languages
+      'org-babel-load-languages
+      (cons '(org . t)
+            org-babel-load-languages))
+    #+end_src emacs-lisp
+
+
+*** Pretty indentation
+
+    #+begin_src emacs-lisp
+      (setq org-startup-indented t) 
+    #+end_src emacs-lisp
+
+
+*** No validator link in HTML exports
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-export-html-validation-link nil)
+#+END_SRC
+
+
+** Ido-mode
+
+*** Interactive do, find-file and iswitchb replacement with fuzzy/flex matching.
+
+#+begin_src emacs-lisp
+(ido-mode t)
+(ido-everywhere 1)
+(setq ido-enable-flex-matching t) ; fuzzy matching is a must have
+(setq ido-enable-last-directory-history t) 
+(setq ido-show-dot-for-dired t)
+(setq ido-use-filename-at-point nil)
+#+end_src
+
+
+*** Command completion in the minibuffer
+
+#+begin_src emacs-lisp
+ (smex-initialize)
+ (setq smex-save-file (concat mvr-elisp-root "/smex-persist/smex.history"))
+#+end_src
+
+
+*** New buffers
+
+#+begin_src emacs-lisp
+(setq ido-create-new-buffer 'always)
+#+end_src
+
+*** File extension priorities
+
+#+begin_src emacs-lisp
+(setq ido-file-extensions-order '(".org" ".tex" ".txt" ".hs" ".lhs" ".el" ".rb"
+".cfg" ".c" ".h" ".html"))
+#+end_src
+
+
+
+
+** ERC
+#+begin_src emacs-lisp
+  (load "~/.ercpass.el")
+     
+  (require 'erc-services)
+  (erc-services-mode 1)
+  (setq erc-prompt-for-nickserv-password nil)     
+  (setq erc-nickserv-passwords
+         `((freenode     (("mvarela" . ,mvr-freenode-pass)))))
+
+      
+  (require 'erc-join)
+  (erc-autojoin-mode 1)
+  (setq erc-autojoin-channels-alist
+            '(("freenode.net" "#emacs" "#haskell")))
+      
+      
+  (require 'erc-match)
+  (setq erc-keywords '("mvarela"))
+  (erc-match-mode)
+      
+  (require 'erc-track)
+  (erc-track-mode t) ; was (erc-track-modified-channels-mode t)
+                         ; Note: erc-track-modified-channels-mode changed
+                         ; to erc-track-mode as of erc-track.el
+                         ; CVS revision 1.23 (November 2002)
+      
+  (add-hook 'erc-mode-hook
+            '(lambda ()
+                (require 'erc-pcomplete)
+                (pcomplete-erc-setup)
+                (erc-completion-mode 1)))
+      
+  (require 'erc-fill)
+  (erc-fill-mode t)
+      
+  (require 'erc-ring)
+  (erc-ring-mode t)
+      
+  (require 'erc-netsplit)
+  (erc-netsplit-mode t)
+      
+  (erc-timestamp-mode t)
+  (setq erc-timestamp-format "[%R-%m/%d]")
+      
+  (erc-button-mode t) ;slow
+  (erc-readonly-mode nil)
+  (setq erc-user-full-name "Martin Varela")
+  (setq erc-email-userid "mvr.rennes@gmail.com")
+      
+      
+  (setq erc-log-insert-log-on-open nil)
+  (setq erc-log-channels nil)
+  (setq erc-log-channels-directory "~/.irclogs/")
+  (setq erc-save-buffer-on-part nil)
+  (setq erc-hide-timestamps nil)
+      
+      
+  (defadvice save-buffers-kill-emacs (before save-logs (arg) activate)
+    (save-some-buffers t (lambda () (when (and (eq major-mode 'erc-mode)
+                                               (not (null buffer-file-name)))))))
+      
+  (add-hook 'erc-insert-post-hook 'erc-save-buffer-in-logs)
+  (add-hook 'erc-mode-hook '(lambda () (when (not (featurep 'xemacs))
+                                         (set (make-variable-buffer-local
+                                               'coding-system-for-write)
+                                               'emacs-mule))))
+  ;; end logging
+      
+  ;; Truncate buffers so they don't hog core.
+  (setq erc-max-buffer-size 20000)
+  (defvar erc-insert-post-hook)
+  (add-hook 'erc-insert-post-hook 'erc-truncate-buffer)
+  (setq erc-truncate-buffer-on-save t)
+      
+      
+  ;; Clears out annoying erc-track-mode stuff for when we don't care.
+  ;; Useful for when ChanServ restarts :P
+  (defun reset-erc-track-mode ()
+    (interactive)
+    (setq erc-modified-channels-alist nil)
+    (erc-modified-channels-update))
+  (global-set-key (kbd "C-c r") 'reset-erc-track-mode)
+      
+      
+  ;;; Finally, connect to the networks.
+  (defun irc-maybe ()
+    "Connect to IRC."
+    (interactive)
+    (when (y-or-n-p "IRC? ")
+      (erc :server "irc.freenode.net" :port 6667
+                  :nick "mvarela" :full-name "Martin Varela")))
+      
+#+end_src
+
+
+** Gnuplot
+
+#+begin_src emacs-lisp
+     (add-to-list 'auto-mode-alist '("\\.gnup$" . gnuplot-mode))
+#+end_src
+
+
+** Spelling
+
+#+begin_src emacs-lisp
+(eval-after-load "ispell"
+   (progn
+     (setq ispell-dictionary "en_US"
+           ispell-extra-args '("-a" "-c" )
+           ispell-silently-savep t
+ )))
+  (setq-default ispell-program-name "aspell")
+#+end_src
+
+
+** LaTeX stuff
+RefTeX enabled in AucTeX
+
+#+begin_src emacs-lisp
+  (setq reftex-plug-into-AUCTeX t)
+  (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+#+end_src
+
+This below taken from: http://www.cs.berkeley.edu/~prmohan/emacs/latex.html and
+modified slightly.
+#+begin_src emacs-lisp
+  
+    (custom-set-variables '(TeX-command-list 
+       (quote (
+               ("XeLaTeX_SyncteX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX
+       nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
+               ("XeLaTeX_NonStop" "%`xelatex --interaction=nonstopmode%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
+               ("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX") 
+               ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX") 
+               ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output") 
+               ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output") 
+               ("AmSTeX" "%(PDF)amstex %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (ams-tex-mode) :help "Run AMSTeX") 
+               ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once") 
+               ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion") 
+               ("BibTeX" "bibtex %s" TeX-run-BibTeX nil t :help "Run BibTeX") 
+               ("View" "%V" TeX-run-discard-or-function nil t :help "Run Viewer") 
+               ("Print" "%p" TeX-run-command t t :help "Print the file") 
+               ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command) 
+               ("File" "%(o?)dvips %d -o %f " TeX-run-command t t :help "Generate PostScript file") 
+               ("Index" "makeindex %s" TeX-run-command nil t :help "Create index file") 
+               ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness") 
+               ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document") 
+               ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files") 
+               ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files") 
+               ("Other" "" TeX-run-command t t :help "Run an arbitrary command") 
+               ("Jump to PDF" "%V" TeX-run-discard-or-function nil t :help "Run Viewer")))))
+    
+    
+    (custom-set-variables
+     '(LaTeX-command "latex -synctex=1")
+     '(TeX-view-program-list (quote (("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b") ("Preview" "open -a Preview.app %o"))))
+    )
+    (setq TeX-source-correlate-method 'synctex)
+    (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
+    
+    
+ #+end_src
+
+For RefTex TOC generation, use a horizontal window split
+
+#+begin_src emacs-lisp
+(setq reftex-toc-split-windows-horizontally t)
+
+#+end_src
+
+** Orgtble-mode hooks
+
+#+begin_src emacs-lisp
+(add-hook 'text-mode-hook 'orgtbl-mode)
+#+end_src
+
+
+** Writing style helpers
+
+#+begin_src emacs-lisp
+(require 'textlint)
+(require 'artbollocks-mode)
+#+end_src
+
+
+** Which-func-mode
+
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'which-func-mode)
+#+end_src
+
+
+
+
+** Gnus and Gmail
+
+#+begin_src emacs-lisp
+(setq gnus-select-method '(nnimap "gmail"
+				  (nnimap-address "imap.gmail.com")
+				  (nnimap-server-port 993)
+				  (nnimap-stream ssl)))
+
+(setq message-send-mail-function 'smtpmail-send-it
+      smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
+      smtpmail-auth-credentials '(("smtp.gmail.com" 587 "mvr.rennes@gmail.com" nil))
+      smtpmail-default-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-server "smtp.gmail.com"
+      smtpmail-smtp-service 587)
+
+(setq gnus-thread-sort-functions
+      '((not gnus-thread-sort-by-date) gnus-thread-sort-by-author))
+
+(setq gnus-article-sort-functions
+      '((not gnus-article-sort-by-date) gnus-article-sort-by-author))
+#+end_src
+
+
+
+** Eshell
+
+Set the prompt closer to the one I use in Bash
+
+#+begin_src emacs-lisp
+(setq eshell-prompt-function
+  (lambda ()
+    (concat 
+     (format-time-string "<%H:%M:%S> [" (current-time))
+     (eshell/whoami)
+     "]: "
+     (eshell/pwd)
+     "\n"
+      (if (= (user-uid) 0) "# " "$ "))))
+#+end_src
+
+* Misc. Settings
+
+** Line-wrapping
+
+   #+begin_src emacs-lisp
+     (set-default 'fill-column 80)
+   #+end_src
+
+** Don't truncate lines
+
+   #+begin_src emacs-lisp
+     (setq truncate-lines t)
+     (setq truncate-partial-width-windows nil)
+   #+end_src
+
+** Column numbers
+
+   #+begin_src emacs-lisp 
+     (setq column-number-mode t)
+   #+end_src emacs-lisp
+
+** History
+
+#+begin_src emacs-lisp
+  (setq savehist-file (concat mvr-elisp-root "/history"))
+#+end_src
+
+** No Scroll bars
+
+#+begin_src emacs-lisp
+  (when (fboundp 'toggle-scroll-bar)
+    (toggle-scroll-bar -1))
+#+end_src
+
+** Auto revert mode
+
+Reload files that were modified on disk.
+
+#+begin_src emacs-lisp
+  (global-auto-revert-mode t)
+#+end_src
+
+** Soft word wrap (visual line mode)
+#+begin_src emacs-lisp
+  (visual-line-mode t)
+  (add-hook 'text-mode-hook 'visual-line-mode)
+#+end_src
+
+
+** Optional starter kit modules
+
+#+begin_src emacs-lisp
+(starter-kit-load "ruby")
+;;(starter-kit-load "lisp")
+;;(starter-kit-load "misc-recommended")
+(starter-kit-load "org")
+#+end_src
+
+** Window systems -- remove visual cruft                             :visual:
+   :PROPERTIES:
+   :CUSTOM_ID: window-system
+   :END:
+#+srcname: starter-kit-window-view-stuff-recommended
+#+begin_src emacs-lisp 
+(when window-system
+  (tooltip-mode -1)
+  (tool-bar-mode -1))
+#+end_src
+
+** No Menu Bar                                                       :visual:
+You really don't need this; trust me.
+#+srcname: starter-kit-no-menu
+#+begin_src emacs-lisp 
+(menu-bar-mode -1)
+#+end_src
+
+** Automatically make scripts executable on save
+
+#+begin_src emacs-lisp
+(add-hook 'after-save-hook
+  'executable-make-buffer-file-executable-if-script-p)
+#+end_src
+
+
+** Disable confirmations for new files / buffers
+
+#+begin_src emacs-lisp
+  (setq confirm-nonexistent-file-or-buffer nil)
+#+end_src
+
+
+** Growl
+
+#+begin_src emacs-lisp
+  (require 'growl)
+#+end_src
+* OS X-specific settings
+
+
+** OS X workaround for missing PATH data
+
+   #+begin_src emacs-lisp
+          ;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
+          (if (eq system-type 'darwin) (progn (setenv "PATH" (concat
+          "/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
+          (list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+          exec-path)
+          (setq exec-path (append
+          (list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+          exec-path))))
+   #+end_src
+
+
+** OS X Raise Emacs Frame
+
+   #+begin_src emacs-lisp
+     (defun ns-raise-emacs ()
+       (ns-do-applescript "tell application \"Emacs\" to activate"))
+   #+end_src
+
+
+
+** OS X Use CMD as META
+
+   #+begin_src emacs-lisp
+     (setq ns-command-modifier (quote meta))
+   #+end_src
+
+** OS X Browser
+
+#+begin_src emacs-lisp
+ (setq browse-url-browser-function 'browse-default-macosx-browser)
+#+end_src
+
+
+** OS X Don't open new frames from workspace requests
+
+#+begin_src emacs-lisp
+  (setq ns-pop-up-frames nil)
+#+end_src
+
+* Emacs server
+
+  #+begin_src emacs-lisp
+    (server-start)
+  #+end_src
+
+
+* Bindings
+  
+** Misc bindings
+
+*** Clipboard management
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-c v") 'clipboard-yank)
+  (global-set-key (kbd "C-c c") 'clipboard-kill-ring-save)
+ #+end_src
+
+*** Go to a line
+ #+begin_src emacs-lisp
+      (global-set-key (kbd "M-g") 'goto-line)
+ #+end_src
+
+*** Steve Yegge's bindings for backward-kill-word and my replacement for kill-region
+
+ #+begin_src emacs-lisp
+   (global-set-key (kbd "C-w") 'backward-kill-word)
+   (global-set-key (kbd "C-c w") 'kill-region)
+ #+end_src
+
+*** Printing
+
+#+begin_src emacs-lisp 
+  (global-set-key (kbd "M-p") 'print-to-pdf)
+#+end_src emacs-lisp
+
+*** Zone when idle
+
+#+begin_src emacs-lisp
+  (defun zone-on ()
+    (interactive)
+    (zone-when-idle 60))
+    (global-set-key (kbd "C-x M-z") 'zone-on)
+#+end_src
+
+*** Window management
+
+   Window shortcuts lifted from some guy's config... 
+
+   #+begin_src emacs-lisp
+     ;; Map the window manipulation keys to meta 0, 1, 2, o
+     (global-set-key (kbd "M-3") 'split-window-horizontally) ; was digit-argument
+     (global-set-key (kbd "M-2") 'split-window-vertically) ; was digit-argument
+     (global-set-key (kbd "M-1") 'delete-other-windows) ; was digit-argument
+     (global-set-key (kbd "M-0") 'delete-window) ; was digit-argument
+     (global-set-key (kbd "M-o") 'other-window) ; was facemenu-keymap
+     ;; Replace dired's M-o
+     (add-hook 'dired-mode-hook (lambda () (define-key dired-mode-map (kbd "M-o") 'other-window))) ; was dired-omit-mode
+     ;; Replace ibuffer's M-o
+     (add-hook 'ibuffer-mode-hook (lambda () (define-key ibuffer-mode-map (kbd "M-o") 'other-window))) ; was ibuffer-visit-buffer-1-window
+     (windmove-default-keybindings 'meta)
+     
+     (global-set-key (kbd "C-x t") 'toggle-transparency)
+   #+end_src
+
+
+*** Maximize frame
+#+begin_src emacs-lisp
+ (global-set-key (kbd "C-|") 'maximize-frame)
+ (global-set-key (kbd "C->") 'halve-frame-h)
+ (global-set-key (kbd "C-<") 'halve-frame-v)
+#+end_src
+
+*** LaTeX and orgtbl
+
+#+begin_src emacs-lisp
+(defun orgtbl-latex-keys ()
+ (progn 
+    (define-key LaTeX-mode-map (kbd "C-c C-t i") 'orgtbl-insert-radio-table)
+    (define-key LaTeX-mode-map (kbd "C-c C-t s") 'orgtbl-send-table)))
+
+(add-hook 'LaTeX-mode-hook 'orgtbl-latex-keys)
+#+end_src
+
+*** Smex
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+#+end_src
+
+*** Comment region
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-M-'") 'comment-or-uncomment-region)
+#+end_src
