@@ -629,15 +629,17 @@ For RefTex TOC generation, use a horizontal window split
 Set the prompt closer to the one I use in Bash
 
 #+begin_src emacs-lisp
-(setq eshell-prompt-function
-  (lambda ()
-    (concat 
-     (format-time-string "<%H:%M:%S> [" (current-time))
-     (eshell/whoami)
-     "]: "
-     (eshell/pwd)
-     "\n"
-      (if (= (user-uid) 0) "# " "$ "))))
+  (setq eshell-prompt-function
+    (lambda ()
+      (concat 
+       (format-time-string "<%H:%M:%S> [" (current-time))
+       (eshell/whoami)
+       "@"
+       (system-name)
+       "]: "
+       (eshell/pwd)
+       "\n"
+        (if (= (user-uid) 0) "# " "$ "))))
 #+end_src
 
 * Misc. Settings
