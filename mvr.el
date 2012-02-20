@@ -1,9 +1,12 @@
 
 (setq user-full-name "Martin Varela")
-(setq user-mail-address "mvr.rennes@gmail.com")
+(setq user-mail-address (
+                         if (string= (system-name) "mvr-cnl") 
+                            "martin.varela@vtt.fi" 
+                          "mvr.rennes@gmail.com"))
 (setq mvr-elisp-root "~/.emacs.d")
 
-(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/djcb-elisp/themes/"))
+;(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/djcb-elisp/themes/"))
 (load-theme 'zenburn t)
 
 (defun make-frame-transparent ()
@@ -120,7 +123,8 @@
 #+LATEX_HEADER: \\usepackage{natbib,fancyhdr}
 #+LATEX_HEADER: \\usepackage{pdflscape}
 #+LATEX_HEADER: \\usepackage{mvrreport}
-#+LATEX_HEADER: \\runningheads{}{RUNNING TITLE GOES HERE}\n"))
+#+LATEX_HEADER: \\runningheads{}{RUNNING TITLE GOES HERE}\n
+#+LATEX_HEADER: \\hypersetup{bookmarks=true, unicode=true, pdfstartview={FitH}, pdftitle={TITLE GOES HERE}, pdfauthor={Martín Varela}, pdfsubject={SUBJECT GOES HERE}, pdfkeywords={KW1} {KW2},pdfnewwindow=true, colorlinks=true}\n"))
 
 (defun mvr-latex-table-fit-to-page ()
   "Wrap the next tabular environment in a resizebox command, so that it does not spill out of the page"
@@ -145,14 +149,14 @@
 (add-hook 'org-mode-hook 'flyspell-mode)
 
 (starter-kit-load "starter-kit-haskell.org")
-
-(load "haskell-site-file")
-(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-(add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
-(add-hook 'haskell-mode-hook 'turn-off-auto-fill)
-(setq haskell-literate-default 'tex)
-(add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
+     
+     (load "haskell-site-file")
+     (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+     (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+     (add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
+     (add-hook 'haskell-mode-hook 'turn-off-auto-fill)
+     (setq haskell-literate-default 'tex)
+;     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
 
 (setq diary-file (concat mvr-elisp-root "/diary/diary"))
 (setq org-agenda-include-diary t)
@@ -222,6 +226,25 @@
 (setq org-startup-indented t)
 
 (setq org-export-html-validation-link nil)
+
+(setq org-export-latex-default-packages-alist  '(("" "fixltx2e" nil)
+                                                 ("" "graphicx" t)
+                                                 ("" "longtable" nil)
+                                                 ("" "float" nil)
+                                                 ("" "wrapfig" nil)
+                                                 ("" "soul" t)
+                                                 ("" "textcomp" t)
+                                                 ("" "marvosym" t)
+                                                 ("" "wasysym" t)
+                                                 ("" "latexsym" t)
+                                                 ("" "amssymb" t)
+                                                 ("" "fontspec" t)
+                                                 ("" "natbib" t)
+                                                 ("" "fancyhdr" t)
+                                                 "\\tolerance=1000"))
+
+(require 'org-google-weather)
+(setq org-google-weather-icon-directory (concat mvr-elisp-root "/src/google-weather-el/icons/"))
 
 (ido-mode t)
 (ido-everywhere 1)
@@ -342,38 +365,21 @@
 (setq reftex-plug-into-AUCTeX t)
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 
-(custom-set-variables '(TeX-command-list 
-   (quote (
-           ("XeLaTeX_SyncteX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX
-   nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
-           ("XeLaTeX_NonStop" "%`xelatex --interaction=nonstopmode%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
-           ("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX") 
-           ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX") 
-           ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output") 
-           ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output") 
-           ("AmSTeX" "%(PDF)amstex %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (ams-tex-mode) :help "Run AMSTeX") 
-           ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once") 
-           ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion") 
-           ("BibTeX" "bibtex %s" TeX-run-BibTeX nil t :help "Run BibTeX") 
-           ("View" "%V" TeX-run-discard-or-function nil t :help "Run Viewer") 
-           ("Print" "%p" TeX-run-command t t :help "Print the file") 
-           ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command) 
-           ("File" "%(o?)dvips %d -o %f " TeX-run-command t t :help "Generate PostScript file") 
-           ("Index" "makeindex %s" TeX-run-command nil t :help "Create index file") 
-           ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness") 
-           ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document") 
-           ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files") 
-           ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files") 
-           ("Other" "" TeX-run-command t t :help "Run an arbitrary command") 
-           ("Jump to PDF" "%V" TeX-run-discard-or-function nil t :help "Run Viewer")))))
-
-
-(custom-set-variables
- '(LaTeX-command "latex -synctex=1")
- '(TeX-view-program-list (quote (("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b") ("Preview" "open -a Preview.app %o"))))
-)
-(setq TeX-source-correlate-method 'synctex)
 (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
+(setq TeX-source-correlate-method 'synctex)
+(add-hook 'LaTeX-mode-hook (lambda ()
+(add-to-list 'TeX-expand-list
+               '("%q" skim-make-url))))
+(defun skim-make-url () (concat
+                (TeX-current-line)
+                " "
+                (expand-file-name (funcall file (TeX-output-extension) t)
+                        (file-name-directory (TeX-master-file)))
+                " "
+                (buffer-file-name)))
+(setq TeX-view-program-list '(("Okular" "okular --unique %u") ("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline %q")))
+(if (eq system-type 'darwin)
+    (setq TeX-view-program-selection '((output-pdf "Skim"))))
 
 (setq reftex-toc-split-windows-horizontally t)
 
@@ -407,10 +413,122 @@
     (concat 
      (format-time-string "<%H:%M:%S> [" (current-time))
      (eshell/whoami)
+     "@"
+     (system-name)
      "]: "
      (eshell/pwd)
      "\n"
       (if (= (user-uid) 0) "# " "$ "))))
+
+(autoload 'forth-mode "gforth.el")
+(autoload 'forth-block-mode "gforth.el")
+(add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
+
+(require 'breadcrumb)
+
+(require 'expand-region)
+
+(require 'cl)
+(defun fill-keymap (keymap &rest mappings)
+  "Fill `KEYMAP' with `MAPPINGS'.
+See `pour-mappings-to'."
+  (pour-mappings-to keymap mappings))
+
+(defun pour-mappings-to (map mappings)
+  "Calls `cofi/set-key' with `map' on every key-fun pair in `MAPPINGS'.
+`MAPPINGS' is a list of string-fun pairs, with a `READ-KBD-MACRO'-readable string and a interactive-fun."
+  (dolist (mapping (group mappings 2))
+    (cofi/set-key map (car mapping) (cadr mapping)))
+  map)
+
+(defun cofi/set-key (map spec cmd)
+  "Set in `map' `spec' to `cmd'.
+
+`Map' may be `'global' `'local' or a keymap.
+A `spec' can be a `read-kbd-macro'-readable string or a vector."
+  (let ((setter-fun (case map
+                      (global #'global-set-key)
+                      (local  #'local-set-key)
+                      (t      (lambda (key def) (define-key map key def)))))
+        (key (typecase spec
+               (vector spec)
+               (string (read-kbd-macro spec))
+               (t (error "wrong argument")))))
+    (funcall setter-fun key cmd)))
+
+(defun group (lst n)
+  "Group `LST' into portions of `N'."
+  (let (groups)
+    (while lst
+      (push (take n lst) groups)
+      (setq lst (nthcdr n lst)))
+    (nreverse groups)))
+
+(defun take (n lst)
+  "Return atmost the first `N' items of `LST'."
+  (let (acc '())
+    (while (and lst (> n 0))
+      (decf n)
+      (push (car lst) acc)
+      (setq  lst (cdr lst)))
+    (nreverse acc)))
+
+(require 'evil-numbers)
+  (setq evil-leader/leader ",")
+  (require 'evil-leader)
+  (require 'evil)
+  (evil-mode 1)
+  (fill-keymap evil-normal-state-map
+               "+"     'evil-numbers/inc-at-pt
+               "-"     'evil-numbers/dec-at-pt
+               "SPC"   'ace-jump-char-mode
+               "S-SPC" 'ace-jump-word-mode
+               "C-SPC" 'ace-jump-line-mode
+               "go"    'goto-char
+               "C-t"   'transpose-chars
+               "M-t"   'transpose-words 
+               "C-:"   'eval-expression)
+  
+  (fill-keymap evil-motion-state-map
+               "_"     'evil-first-non-blank
+               "C-e"   'end-of-line
+               "C-S-d" 'evil-scroll-up
+               "C-S-f" 'evil-scroll-page-up
+               "_"     'evil-first-non-blank
+               "C-y"   nil)
+  
+  (fill-keymap evil-insert-state-map
+               "C-e" 'end-of-line)
+(evil-declare-key 'normal org-mode-map
+  (kbd "RET") 'org-open-at-point
+  "za"        'org-cycle
+  "zA"        'org-shifttab
+  "zm"        'hide-body
+  "zr"        'show-all
+  "zo"        'show-subtree
+  "zO"        'show-all
+  "zc"        'hide-subtree
+  "zC"        'hide-all
+  (kbd "M-j") 'org-shiftleft
+  (kbd "M-k") 'org-shiftright
+  (kbd "M-H") 'org-metaleft
+  (kbd "M-J") 'org-metadown
+  (kbd "M-K") 'org-metaup
+  (kbd "M-L") 'org-metaright)
+
+(evil-declare-key 'insert org-mode-map
+  (kbd "M-j") 'org-shiftleft
+  (kbd "M-k") 'org-shiftright
+  (kbd "M-H") 'org-metaleft
+  (kbd "M-J") 'org-metadown
+  (kbd "M-K") 'org-metaup
+  (kbd "M-L") 'org-metaright)  
+  
+
+(evil-leader/set-key
+  "b" 'ido-switch-buffer
+  "m" 'compile
+  "g" 'magit-status)
 
 (set-default 'fill-column 80)
 
@@ -511,3 +629,8 @@ exec-path))))
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
 (global-set-key (kbd "C-M-'") 'comment-or-uncomment-region)
+
+(global-set-key (kbd "M-]") 'bc-set)
+(global-set-key (kbd "M-[") 'bc-previous)
+
+(global-set-key (kbd "C-{") 'er/expand-region)
