@@ -527,7 +527,11 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 
 (evil-leader/set-key
   "b" 'ido-switch-buffer
+  "B" 'ibuffer
+  "k" 'kill-buffer 
   "m" 'compile
+  "s" 'save-buffer
+  "f" 'ido-find-file
   "g" 'magit-status)
 
 (set-default 'fill-column 80)
