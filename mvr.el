@@ -424,7 +424,10 @@
 (autoload 'forth-block-mode "gforth.el")
 (add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
 
-(require 'breadcrumb)
+; commented, as using evil-mode this can easily be done with marks
+;(require 'breadcrumb)
+
+(require 'ace-jump-mode)
 
 (require 'expand-region)
 
@@ -532,6 +535,8 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
   "m" 'compile
   "s" 'save-buffer
   "f" 'ido-find-file
+  "SPC" 'ace-jump-word-mode
+  "q" 'fill-paragraph
   "g" 'magit-status)
 
 (set-default 'fill-column 80)
@@ -634,7 +639,7 @@ exec-path))))
 
 (global-set-key (kbd "C-M-'") 'comment-or-uncomment-region)
 
-(global-set-key (kbd "M-]") 'bc-set)
-(global-set-key (kbd "M-[") 'bc-previous)
+;(global-set-key (kbd "M-]") 'bc-set)
+;(global-set-key (kbd "M-[") 'bc-previous)
 
 (global-set-key (kbd "C-{") 'er/expand-region)

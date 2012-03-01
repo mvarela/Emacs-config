@@ -246,15 +246,18 @@ each header, and then converts that to a FreeMind mindmap.
 ** Haskell mode options
 
    #+begin_src emacs-lisp 
-     (starter-kit-load "starter-kit-haskell.org")
-     
-     (load "haskell-site-file")
-     (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-     (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-     (add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
-     (add-hook 'haskell-mode-hook 'turn-off-auto-fill)
-     (setq haskell-literate-default 'tex)
-;     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
+          (starter-kit-load "starter-kit-haskell.org")
+          
+          (load "haskell-site-file")
+          (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+          (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+          (add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
+          (add-hook 'haskell-mode-hook 'turn-off-auto-fill)
+          (setq haskell-literate-default 'tex)
+          (autoload 'ghc-init "ghc" nil t)
+          ;;(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+          (add-hook 'haskell-mode-hook (lambda () (ghc-init) (flymake-mode)))
+     ;     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
    #+end_src emacs-lisp
 
 
@@ -709,9 +712,16 @@ Just set the autoload options.
 ** Breadcrumb
 
 #+begin_src emacs-lisp
-(require 'breadcrumb)
+; commented, as using evil-mode this can easily be done with marks
+;(require 'breadcrumb)
 #+end_src
 
+
+** Ace-jump
+
+#+begin_src emacs-lisp
+  (require 'ace-jump-mode)
+#+end_src
 
 ** Expand-Region
 #+begin_src emacs-lisp
@@ -831,6 +841,7 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
     "s" 'save-buffer
     "f" 'ido-find-file
     "SPC" 'ace-jump-word-mode
+    "q" 'fill-paragraph
     "g" 'magit-status)
 #+end_src
 * Misc. Settings
@@ -1073,8 +1084,8 @@ You really don't need this; trust me.
 *** Breadcrumbs
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "M-]") 'bc-set)
-(global-set-key (kbd "M-[") 'bc-previous)
+;(global-set-key (kbd "M-]") 'bc-set)
+;(global-set-key (kbd "M-[") 'bc-previous)
 #+end_src
 
 *** Expand Region
