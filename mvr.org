@@ -23,8 +23,9 @@
 
 *** Color theme and chooser functions
     #+begin_src emacs-lisp
-;(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/djcb-elisp/themes/"))
-(load-theme 'zenburn t)
+(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
+(load-theme 'tiago t)
+;;(load-theme 'zenburn t)
     #+end_src
 
 
@@ -128,7 +129,7 @@
     (set-frame-size (selected-frame) (frame-width) (/ (frame-height)
                                                      2)))
   
-  (maximize-frame)
+;;  (maximize-frame)
 #+end_src
 
 
@@ -187,15 +188,30 @@ each header, and then converts that to a FreeMind mindmap.
 (interactive)
 (insert-string "
 #+LATEX_HEADER: \\usepackage{float}
-#+LATEX_HEADER: \\usepackage{amssymb,amsfonts,amsmath,latexsym,setspace}
+#+LATEX_HEADER: \\usepackage{amsfonts,latexsym,setspace}
 #+LATEX_HEADER: \\usepackage{natbib,fancyhdr}
 #+LATEX_HEADER: \\usepackage{pdflscape}
 #+LATEX_HEADER: \\usepackage{mvrreport}
+#+LATEX_HEADER: \\setmainfont[Ligatures=TeX]{TeX Gyre Pagella}
 #+LATEX_HEADER: \\runningheads{}{RUNNING TITLE GOES HERE}\n
 #+LATEX_HEADER: \\hypersetup{bookmarks=true, unicode=true, pdfstartview={FitH}, pdftitle={TITLE GOES HERE}, pdfauthor={Martín Varela}, pdfsubject={SUBJECT GOES HERE}, pdfkeywords={KW1} {KW2},pdfnewwindow=true, colorlinks=true}\n"))
 
 #+end_src
 
+#+begin_src emacs-lisp
+(defun mvr-org-latex-beamer-header ()
+"Inserts custom packages to be used in org-mode LaTeX exports of a certain type"
+(interactive)
+(insert-string "
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger,xetex]
+#+BEAMER_FRAME_LEVEL: 2
+#+LATEX_HEADER: \\setsansfont[Ligatures=TeX]{Linux Biolinum O}
+#+LATEX_HEADER: \\usepackage{vttbeamer}
+#+BEAMER_HEADER_EXTRA: \\author[M. Varela]{Mart\\'{\\i}n Varela}
+#+LATEX_HEADER: \\hypersetup{bookmarks=true, unicode=true, pdfstartview={FitH}, pdftitle={TITLE GOES HERE}, pdfauthor={Martín Varela}, pdfsubject={SUBJECT GOES HERE}, pdfkeywords={KW1} {KW2},pdfnewwindow=true, colorlinks=false}#+LATEX_HEADER: \\institute[VTT]{VTT Technical Research Centre of Finland}"))
+#+end_src
 
 ** Make LaTeX tabular environments fit the page
 
@@ -241,7 +257,11 @@ each header, and then converts that to a FreeMind mindmap.
           (add-hook 'org-mode-hook 'flyspell-mode)
    #+end_src
    
+Handling ".eml" files in message-mode
 
+#+begin_src emacs-lisp
+ (add-to-list 'auto-mode-alist '("\\.eml$" . message-mode))
+#+end_src
 
 ** Haskell mode options
 
@@ -254,6 +274,7 @@ each header, and then converts that to a FreeMind mindmap.
           (add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
           (add-hook 'haskell-mode-hook 'turn-off-auto-fill)
           (setq haskell-literate-default 'tex)
+          (require 'ghc)
           (autoload 'ghc-init "ghc" nil t)
           ;;(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
           (add-hook 'haskell-mode-hook (lambda () (ghc-init) (flymake-mode)))
@@ -728,6 +749,11 @@ Just set the autoload options.
 (require 'expand-region)
 #+end_src
 
+** Mark-multiple
+#+begin_src emacs-lisp
+(require 'mark-more-like-this)
+(global-set-key (kbd "C-M-m") 'mark-more-like-this)
+#+end_src 
 ** Evil
 Lifted most of this from [[https://github.com/cofi/dotfiles/blob/master/emacs.d/cofi-evil.el][cofi's config]]
 
@@ -735,6 +761,8 @@ Some auxiliary functions...
 
 #+begin_src emacs-lisp
 (require 'cl)
+(require 'surround)
+(global-surround-mode 1)
 (defun fill-keymap (keymap &rest mappings)
   "Fill `KEYMAP' with `MAPPINGS'.
 See `pour-mappings-to'."
@@ -780,70 +808,135 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
     (nreverse acc)))
 #+end_src
 
+
+Relative / absolute numbering
+
 #+begin_src emacs-lisp
-    (require 'evil-numbers)
-    (setq evil-leader/leader ",")
-    (require 'evil-leader)
-    (require 'evil)
-    (evil-mode 1)
-    (fill-keymap evil-normal-state-map
-                 "+"     'evil-numbers/inc-at-pt
-                 "-"     'evil-numbers/dec-at-pt
-                 "SPC"   'ace-jump-char-mode
-                 "S-SPC" 'ace-jump-word-mode
-                 "C-SPC" 'ace-jump-line-mode
-                 "go"    'goto-char
-                 "C-t"   'transpose-chars
-                 "M-t"   'transpose-words 
-                 "C-:"   'eval-expression)
-    
-    (fill-keymap evil-motion-state-map
-                 "_"     'evil-first-non-blank
-                 "C-e"   'end-of-line
-                 "C-S-d" 'evil-scroll-up
-                 "C-S-f" 'evil-scroll-page-up
-                 "_"     'evil-first-non-blank
-                 "C-y"   nil)
-    
-    (fill-keymap evil-insert-state-map
-                 "C-e" 'end-of-line)
-  (evil-declare-key 'normal org-mode-map
-    (kbd "RET") 'org-open-at-point
-    "za"        'org-cycle
-    "zA"        'org-shifttab
-    "zm"        'hide-body
-    "zr"        'show-all
-    "zo"        'show-subtree
-    "zO"        'show-all
-    "zc"        'hide-subtree
-    "zC"        'hide-all
-    (kbd "M-j") 'org-shiftleft
-    (kbd "M-k") 'org-shiftright
-    (kbd "M-H") 'org-metaleft
-    (kbd "M-J") 'org-metadown
-    (kbd "M-K") 'org-metaup
-    (kbd "M-L") 'org-metaright)
-  
-  (evil-declare-key 'insert org-mode-map
-    (kbd "M-j") 'org-shiftleft
-    (kbd "M-k") 'org-shiftright
-    (kbd "M-H") 'org-metaleft
-    (kbd "M-J") 'org-metadown
-    (kbd "M-K") 'org-metaup
-    (kbd "M-L") 'org-metaright)  
-    
-  
-  (evil-leader/set-key
-    "b" 'ido-switch-buffer
-    "B" 'ibuffer
-    "k" 'kill-buffer 
-    "m" 'compile
-    "s" 'save-buffer
-    "f" 'ido-find-file
-    "SPC" 'ace-jump-word-mode
-    "q" 'fill-paragraph
-    "g" 'magit-status)
+(defun mvr-evil-rnu () (interactive) (setq linum-format 'my-linum-relative-line-numbers))
+(defun mvr-evil-nu () (interactive) (setq linum-format "%4d "))
+;;(add-hook 'evil-insert-state-entry-hook 'mvr-evil-nu)
+;;(add-hook 'evil-normal-state-entry-hook 'mvr-evil-rnu)
 #+end_src
+
+#+begin_src emacs-lisp
+     (require 'evil-numbers)
+     (setq evil-leader/leader ",")
+     (require 'evil-leader)
+     (require 'evil)
+     (evil-mode 1)
+     (fill-keymap evil-normal-state-map
+                  "+"     'evil-numbers/inc-at-pt
+                  "-"     'evil-numbers/dec-at-pt
+                  "SPC"   'ace-jump-char-mode
+                  "S-SPC" 'ace-jump-word-mode
+                  "C-SPC" 'ace-jump-line-mode
+                  "go"    'goto-char
+                  "C-t"   'transpose-chars
+                  "M-t"   'transpose-words 
+                  "C-:"   'eval-expression)
+     
+     (fill-keymap evil-motion-state-map
+                  "_"     'evil-first-non-blank
+                  "C-e"   'end-of-line
+                  "C-S-d" 'evil-scroll-up
+                  "C-S-f" 'evil-scroll-page-up
+                  "_"     'evil-first-non-blank
+                  "C-y"   nil)
+     
+  (fill-keymap evil-visual-state-map
+                  "/"     'comment-or-uncomment-region
+                  "\\"     'indent-region
+                  "SPC"   'ace-jump-char-mode
+                  "S-SPC" 'ace-jump-word-mode
+                  "C-SPC" 'ace-jump-line-mode
+                  "A"     'mark-all-like-this 
+                  "N"     'mark-previous-like-this 
+                  "n"     'mark-more-like-this) 
+     (fill-keymap evil-insert-state-map
+                  "C-e" 'end-of-line
+                   "M-'" 'ucs-insert)
+   (evil-declare-key 'normal org-mode-map
+     (kbd "RET") 'org-open-at-point
+     "za"        'org-cycle
+     "zA"        'org-shifttab
+     "zm"        'hide-body
+     "zr"        'show-all
+     "zo"        'show-subtree
+     "zO"        'show-all
+     "zc"        'hide-subtree
+     "zC"        'hide-all
+     (kbd "M-j") 'org-shiftleft
+     (kbd "M-k") 'org-shiftright
+     (kbd "M-H") 'org-metaleft
+     (kbd "M-J") 'org-metadown
+     (kbd "M-K") 'org-metaup
+     (kbd "M-L") 'org-metaright)
+   
+   (evil-declare-key 'insert org-mode-map
+     (kbd "M-j") 'org-shiftleft
+     (kbd "M-k") 'org-shiftright
+     (kbd "M-H") 'org-metaleft
+     (kbd "M-J") 'org-metadown
+     (kbd "M-K") 'org-metaup
+     (kbd "M-L") 'org-metaright)  
+     
+   (evil-leader/set-key
+     "b" 'ido-switch-buffer
+     "B" 'ibuffer
+     "k" 'kill-buffer 
+     "m" 'compile
+     "s" 'save-buffer
+     "f" 'ido-find-file
+     "SPC" 'ace-jump-word-mode
+     "q" 'fill-paragraph
+     "x" 'smex
+     "r" 'mvr-evil-rnu
+     "R" 'mvr-evil-nu
+     "l" 'linum-mode
+     "d" 'edit-server-done
+     "g" 'magit-status)
+#+end_src
+
+** Linum
+
+#+begin_src emacs-lisp
+
+(defvar my-linum-format-string "%4d ")
+(setq linum-format "%4d ")
+(add-hook 'linum-before-numbering-hook 'my-linum-get-format-string)
+(defun my-linum-get-format-string ()
+  (let* ((width (max 4 (length (number-to-string
+                             (count-lines (point-min) (point-max))))))
+         (format (concat "%" (number-to-string width) "d ")))
+    (setq my-linum-format-string format)))
+
+(defvar my-linum-current-line-number 0)
+
+(defun my-linum-relative-line-numbers (line-number)
+  (let ((offset (abs (- line-number my-linum-current-line-number))))
+    (propertize (format my-linum-format-string offset) 'face 'linum)))
+
+(defadvice linum-update (around my-linum-update)
+  (let ((my-linum-current-line-number (line-number-at-pos)))
+    ad-do-it))
+(ad-activate 'linum-update)
+
+#+end_src 
+** Projectile
+
+#+begin_src emacs-lisp
+(require 'projectile)
+(projectile-global-mode)
+#+end_src
+** Rinari and RHTML
+
+#+begin_src emacs-lisp
+ (require 'rinari)
+;;; rhtml-mode
+     (require 'rhtml-mode)
+     (add-hook 'rhtml-mode-hook
+     	  (lambda () (rinari-launch)))
+#+end_src 
 * Misc. Settings
 
 ** Line-wrapping
@@ -940,6 +1033,11 @@ You really don't need this; trust me.
 #+begin_src emacs-lisp
   (require 'growl)
 #+end_src
+
+** Fringe
+ #+begin_src emacs-lisp
+   (fringe-mode 0)
+#+end_src
 * OS X-specific settings
 
 
@@ -991,6 +1089,13 @@ You really don't need this; trust me.
     (server-start)
   #+end_src
 
+ Add the edit-server for Chrome
+
+#+begin_src emacs-lisp
+ (require 'edit-server)
+ (setq edit-server-new-frame nil)
+ (edit-server-start)
+#+end_src
 
 * Bindings
   

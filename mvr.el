@@ -6,8 +6,9 @@
                           "mvr.rennes@gmail.com"))
 (setq mvr-elisp-root "~/.emacs.d")
 
-;(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/djcb-elisp/themes/"))
-(load-theme 'zenburn t)
+(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
+(load-theme 'tiago t)
+;;(load-theme 'zenburn t)
 
 (defun make-frame-transparent ()
   (interactive)
@@ -47,47 +48,47 @@
 (defun enable-color-printing ()  (interactive) (setq ps-print-color-p 1))
 
 (defun get-frame-max-lines ()
-  (- 
-   (/ 
-    (* (- (display-pixel-height) 20) (frame-height)) 
-    (frame-pixel-height))
-   2))
-
-(defun get-frame-max-cols ()
-  (-
-   (/
-    (* (display-pixel-width) (frame-width))
-    (frame-pixel-width)) 
-   0  ))
-
-(defun maximize-frame () 
-  (interactive)
-  (set-frame-position (selected-frame) 0 20)
-  (set-frame-size (selected-frame) (get-frame-max-cols) (get-frame-max-lines)))
-
-(defun half-frame-h ()
-  (interactive)
-  (set-frame-position (selected-frame) 0 20)
-  (set-frame-size (selected-frame) (/ (get-frame-max-cols) 2) (get-frame-max-lines)))
-
-(defun half-frame-v ()
-  (interactive)
-  (set-frame-position (selected-frame) 0 20)
-  (set-frame-size (selected-frame) (get-frame-max-cols) (/ (get-frame-max-lines)
-                                                         2)))
-
-(defun halve-frame-h ()
-  (interactive)
-  (set-frame-position (selected-frame) 0 20)
-  (set-frame-size (selected-frame) (/ (frame-width) 2) (frame-height)))
-
-(defun halve-frame-v ()
-  (interactive)
-  (set-frame-position (selected-frame) 0 20)
-  (set-frame-size (selected-frame) (frame-width) (/ (frame-height)
-                                                   2)))
-
-(maximize-frame)
+    (- 
+     (/ 
+      (* (- (display-pixel-height) 20) (frame-height)) 
+      (frame-pixel-height))
+     2))
+  
+  (defun get-frame-max-cols ()
+    (-
+     (/
+      (* (display-pixel-width) (frame-width))
+      (frame-pixel-width)) 
+     0  ))
+  
+  (defun maximize-frame () 
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (get-frame-max-cols) (get-frame-max-lines)))
+  
+  (defun half-frame-h ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (/ (get-frame-max-cols) 2) (get-frame-max-lines)))
+  
+  (defun half-frame-v ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (get-frame-max-cols) (/ (get-frame-max-lines)
+                                                           2)))
+  
+  (defun halve-frame-h ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (/ (frame-width) 2) (frame-height)))
+  
+  (defun halve-frame-v ()
+    (interactive)
+    (set-frame-position (selected-frame) 0 20)
+    (set-frame-size (selected-frame) (frame-width) (/ (frame-height)
+                                                     2)))
+  
+;;  (maximize-frame)
 
 (defun shrink-window-two-thirds ()
   (interactive)
@@ -119,12 +120,26 @@
 (interactive)
 (insert-string "
 #+LATEX_HEADER: \\usepackage{float}
-#+LATEX_HEADER: \\usepackage{amssymb,amsfonts,amsmath,latexsym,setspace}
+#+LATEX_HEADER: \\usepackage{amsfonts,latexsym,setspace}
 #+LATEX_HEADER: \\usepackage{natbib,fancyhdr}
 #+LATEX_HEADER: \\usepackage{pdflscape}
 #+LATEX_HEADER: \\usepackage{mvrreport}
+#+LATEX_HEADER: \\setmainfont[Ligatures=TeX]{TeX Gyre Pagella}
 #+LATEX_HEADER: \\runningheads{}{RUNNING TITLE GOES HERE}\n
 #+LATEX_HEADER: \\hypersetup{bookmarks=true, unicode=true, pdfstartview={FitH}, pdftitle={TITLE GOES HERE}, pdfauthor={Martín Varela}, pdfsubject={SUBJECT GOES HERE}, pdfkeywords={KW1} {KW2},pdfnewwindow=true, colorlinks=true}\n"))
+
+(defun mvr-org-latex-beamer-header ()
+"Inserts custom packages to be used in org-mode LaTeX exports of a certain type"
+(interactive)
+(insert-string "
+#+startup: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [bigger,xetex]
+#+BEAMER_FRAME_LEVEL: 2
+#+LATEX_HEADER: \\setsansfont[Ligatures=TeX]{Linux Biolinum O}
+#+LATEX_HEADER: \\usepackage{vttbeamer}
+#+BEAMER_HEADER_EXTRA: \\author[M. Varela]{Mart\\'{\\i}n Varela}
+#+LATEX_HEADER: \\hypersetup{bookmarks=true, unicode=true, pdfstartview={FitH}, pdftitle={TITLE GOES HERE}, pdfauthor={Martín Varela}, pdfsubject={SUBJECT GOES HERE}, pdfkeywords={KW1} {KW2},pdfnewwindow=true, colorlinks=false}#+LATEX_HEADER: \\institute[VTT]{VTT Technical Research Centre of Finland}"))
 
 (defun mvr-latex-table-fit-to-page ()
   "Wrap the next tabular environment in a resizebox command, so that it does not spill out of the page"
@@ -148,6 +163,8 @@
 (add-hook 'latex-mode-hook 'flyspell-mode)
 (add-hook 'org-mode-hook 'flyspell-mode)
 
+(add-to-list 'auto-mode-alist '("\\.eml$" . message-mode))
+
 (starter-kit-load "starter-kit-haskell.org")
      
      (load "haskell-site-file")
@@ -156,6 +173,10 @@
      (add-to-list 'auto-mode-alist '("\\.hs$" . haskell-mode))
      (add-hook 'haskell-mode-hook 'turn-off-auto-fill)
      (setq haskell-literate-default 'tex)
+     (require 'ghc)
+     (autoload 'ghc-init "ghc" nil t)
+     ;;(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+     (add-hook 'haskell-mode-hook (lambda () (ghc-init) (flymake-mode)))
 ;     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
 
 (setq diary-file (concat mvr-elisp-root "/diary/diary"))
@@ -431,7 +452,12 @@
 
 (require 'expand-region)
 
+(require 'mark-more-like-this)
+(global-set-key (kbd "C-M-m") 'mark-more-like-this)
+
 (require 'cl)
+(require 'surround)
+(global-surround-mode 1)
 (defun fill-keymap (keymap &rest mappings)
   "Fill `KEYMAP' with `MAPPINGS'.
 See `pour-mappings-to'."
@@ -476,68 +502,116 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
       (setq  lst (cdr lst)))
     (nreverse acc)))
 
+(defun mvr-evil-rnu () (interactive) (setq linum-format 'my-linum-relative-line-numbers))
+(defun mvr-evil-nu () (interactive) (setq linum-format "%4d "))
+;;(add-hook 'evil-insert-state-entry-hook 'mvr-evil-nu)
+;;(add-hook 'evil-normal-state-entry-hook 'mvr-evil-rnu)
+
 (require 'evil-numbers)
-  (setq evil-leader/leader ",")
-  (require 'evil-leader)
-  (require 'evil)
-  (evil-mode 1)
-  (fill-keymap evil-normal-state-map
-               "+"     'evil-numbers/inc-at-pt
-               "-"     'evil-numbers/dec-at-pt
-               "SPC"   'ace-jump-char-mode
-               "S-SPC" 'ace-jump-word-mode
-               "C-SPC" 'ace-jump-line-mode
-               "go"    'goto-char
-               "C-t"   'transpose-chars
-               "M-t"   'transpose-words 
-               "C-:"   'eval-expression)
-  
-  (fill-keymap evil-motion-state-map
-               "_"     'evil-first-non-blank
-               "C-e"   'end-of-line
-               "C-S-d" 'evil-scroll-up
-               "C-S-f" 'evil-scroll-page-up
-               "_"     'evil-first-non-blank
-               "C-y"   nil)
-  
-  (fill-keymap evil-insert-state-map
-               "C-e" 'end-of-line)
-(evil-declare-key 'normal org-mode-map
-  (kbd "RET") 'org-open-at-point
-  "za"        'org-cycle
-  "zA"        'org-shifttab
-  "zm"        'hide-body
-  "zr"        'show-all
-  "zo"        'show-subtree
-  "zO"        'show-all
-  "zc"        'hide-subtree
-  "zC"        'hide-all
-  (kbd "M-j") 'org-shiftleft
-  (kbd "M-k") 'org-shiftright
-  (kbd "M-H") 'org-metaleft
-  (kbd "M-J") 'org-metadown
-  (kbd "M-K") 'org-metaup
-  (kbd "M-L") 'org-metaright)
+   (setq evil-leader/leader ",")
+   (require 'evil-leader)
+   (require 'evil)
+   (evil-mode 1)
+   (fill-keymap evil-normal-state-map
+                "+"     'evil-numbers/inc-at-pt
+                "-"     'evil-numbers/dec-at-pt
+                "SPC"   'ace-jump-char-mode
+                "S-SPC" 'ace-jump-word-mode
+                "C-SPC" 'ace-jump-line-mode
+                "go"    'goto-char
+                "C-t"   'transpose-chars
+                "M-t"   'transpose-words 
+                "C-:"   'eval-expression)
+   
+   (fill-keymap evil-motion-state-map
+                "_"     'evil-first-non-blank
+                "C-e"   'end-of-line
+                "C-S-d" 'evil-scroll-up
+                "C-S-f" 'evil-scroll-page-up
+                "_"     'evil-first-non-blank
+                "C-y"   nil)
+   
+(fill-keymap evil-visual-state-map
+                "/"     'comment-or-uncomment-region
+                "\\"     'indent-region
+                "SPC"   'ace-jump-char-mode
+                "S-SPC" 'ace-jump-word-mode
+                "C-SPC" 'ace-jump-line-mode
+                "A"     'mark-all-like-this 
+                "N"     'mark-previous-like-this 
+                "n"     'mark-more-like-this) 
+   (fill-keymap evil-insert-state-map
+                "C-e" 'end-of-line
+                 "M-'" 'ucs-insert)
+ (evil-declare-key 'normal org-mode-map
+   (kbd "RET") 'org-open-at-point
+   "za"        'org-cycle
+   "zA"        'org-shifttab
+   "zm"        'hide-body
+   "zr"        'show-all
+   "zo"        'show-subtree
+   "zO"        'show-all
+   "zc"        'hide-subtree
+   "zC"        'hide-all
+   (kbd "M-j") 'org-shiftleft
+   (kbd "M-k") 'org-shiftright
+   (kbd "M-H") 'org-metaleft
+   (kbd "M-J") 'org-metadown
+   (kbd "M-K") 'org-metaup
+   (kbd "M-L") 'org-metaright)
+ 
+ (evil-declare-key 'insert org-mode-map
+   (kbd "M-j") 'org-shiftleft
+   (kbd "M-k") 'org-shiftright
+   (kbd "M-H") 'org-metaleft
+   (kbd "M-J") 'org-metadown
+   (kbd "M-K") 'org-metaup
+   (kbd "M-L") 'org-metaright)  
+   
+ (evil-leader/set-key
+   "b" 'ido-switch-buffer
+   "B" 'ibuffer
+   "k" 'kill-buffer 
+   "m" 'compile
+   "s" 'save-buffer
+   "f" 'ido-find-file
+   "SPC" 'ace-jump-word-mode
+   "q" 'fill-paragraph
+   "x" 'smex
+   "r" 'mvr-evil-rnu
+   "R" 'mvr-evil-nu
+   "l" 'linum-mode
+   "d" 'edit-server-done
+   "g" 'magit-status)
 
-(evil-declare-key 'insert org-mode-map
-  (kbd "M-j") 'org-shiftleft
-  (kbd "M-k") 'org-shiftright
-  (kbd "M-H") 'org-metaleft
-  (kbd "M-J") 'org-metadown
-  (kbd "M-K") 'org-metaup
-  (kbd "M-L") 'org-metaright)  
-  
+(defvar my-linum-format-string "%4d ")
+(setq linum-format "%4d ")
+(add-hook 'linum-before-numbering-hook 'my-linum-get-format-string)
+(defun my-linum-get-format-string ()
+  (let* ((width (max 4 (length (number-to-string
+                             (count-lines (point-min) (point-max))))))
+         (format (concat "%" (number-to-string width) "d ")))
+    (setq my-linum-format-string format)))
 
-(evil-leader/set-key
-  "b" 'ido-switch-buffer
-  "B" 'ibuffer
-  "k" 'kill-buffer 
-  "m" 'compile
-  "s" 'save-buffer
-  "f" 'ido-find-file
-  "SPC" 'ace-jump-word-mode
-  "q" 'fill-paragraph
-  "g" 'magit-status)
+(defvar my-linum-current-line-number 0)
+
+(defun my-linum-relative-line-numbers (line-number)
+  (let ((offset (abs (- line-number my-linum-current-line-number))))
+    (propertize (format my-linum-format-string offset) 'face 'linum)))
+
+(defadvice linum-update (around my-linum-update)
+  (let ((my-linum-current-line-number (line-number-at-pos)))
+    ad-do-it))
+(ad-activate 'linum-update)
+
+(require 'projectile)
+(projectile-global-mode)
+
+(require 'rinari)
+;;; rhtml-mode
+     (require 'rhtml-mode)
+     (add-hook 'rhtml-mode-hook
+          (lambda () (rinari-launch)))
 
 (set-default 'fill-column 80)
 
@@ -574,6 +648,8 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 
 (require 'growl)
 
+(fringe-mode 0)
+
 ;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
 (if (eq system-type 'darwin) (progn (setenv "PATH" (concat
 "/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
@@ -593,6 +669,10 @@ exec-path))))
 (setq ns-pop-up-frames nil)
 
 (server-start)
+
+(require 'edit-server)
+(setq edit-server-new-frame nil)
+(edit-server-start)
 
 (global-set-key (kbd "C-c v") 'clipboard-yank)
 (global-set-key (kbd "C-c c") 'clipboard-kill-ring-save)
