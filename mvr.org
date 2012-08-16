@@ -894,6 +894,11 @@ Relative / absolute numbering
      "R" 'mvr-evil-nu
      "l" 'linum-mode
      "d" 'edit-server-done
+     "3" 'split-window-horizontally
+     "2" 'split-window-vertically
+     "1" 'delete-other-windows
+     "0" 'delete-window
+     "o" 'other-window
      "g" 'magit-status)
 #+end_src
 
