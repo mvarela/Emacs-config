@@ -865,6 +865,16 @@ Relative / absolute numbering
 ;;(add-hook 'evil-normal-state-entry-hook 'mvr-evil-rnu)
 #+end_src
 
+
+Break a line (inverse of 'J')
+
+#+begin_src emacs-lisp
+(defun mvr-evil-break-line()
+  "splits a line"
+  (interactive)
+  (save-excursion (insert "\n")))
+#+end_src
+
 #+begin_src emacs-lisp
      (require 'evil-numbers)
      (setq evil-leader/leader ",")
@@ -950,6 +960,7 @@ Relative / absolute numbering
      "0" 'delete-window
      "o" 'other-window
      "z" 'suspend-emacs
+     "J" 'mvr-evil-break-line
      "g" 'magit-status)
 #+end_src
 
