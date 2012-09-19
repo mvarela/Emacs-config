@@ -880,8 +880,9 @@ Relative / absolute numbering
                   "go"    'goto-char
                   "C-t"   'transpose-chars
                   "M-t"   'transpose-words 
-                  "C-:"   'eval-expression)
-     
+                  "C-:"   'eval-expression
+                  "M-a"   'mvr-changes-add) 
+
      (fill-keymap evil-motion-state-map
                   "_"     'evil-first-non-blank
                   "C-e"   'end-of-line
