@@ -235,8 +235,8 @@ each header, and then converts that to a FreeMind mindmap.
 ** Highlighting changes
 
    #+begin_src emacs-lisp
-     (global-highlight-changes-mode t)
-     (setq highlight-changes-visibility-initial-state nil)
+  ;   (global-highlight-changes-mode t)
+  ;   (setq highlight-changes-visibility-initial-state nil)
    #+end_src
 
 
@@ -253,8 +253,10 @@ each header, and then converts that to a FreeMind mindmap.
 ** Hooks for using text mode enhancements 
 
    #+begin_src emacs-lisp
-          (add-hook 'latex-mode-hook 'flyspell-mode)
-          (add-hook 'org-mode-hook 'flyspell-mode)
+ (add-hook 'latex-mode-hook 'turn-on-auto-fill)
+ (add-hook 'org-mode-hook 'turn-on-auto-fill)
+         ;; (add-hook 'latex-mode-hook 'flyspell-mode)
+         ;; (add-hook 'org-mode-hook 'flyspell-mode)
    #+end_src
    
 Handling ".eml" files in message-mode
@@ -577,6 +579,51 @@ This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html]
 
 
 ** LaTeX stuff
+
+Quick helper functions for using 'changes' mode
+
+#+begin_src emacs-lisp
+(setq mvr-changes-id "mvr")
+(defun mvr-changes-add ()
+"Inserts an \added command to a LaTeX document using the 'changes' package"
+  (interactive)
+    (insert (concat "\\added[id=" mvr-changes-id  "]{}"))
+    (goto-char (- (point) 1))
+        (if (evil-mode)(evil-insert 0)))
+
+(defun mvr-changes-delete ()
+  "Inserts an \delete command to a LaTeX document using the 'changes' package"
+  (interactive)
+  (if (use-region-p)
+      (save-excursion
+        (let ((low (region-beginning))
+              (high (region-end))
+               (command (concat "\\deleted[id=" mvr-changes-id  "]{")))
+        (goto-char high)
+        (insert "}")
+        (goto-char low)
+        (insert command)))
+    (message "This command can only act on an active region")))
+
+
+
+(defun mvr-changes-replace ()
+  "Inserts an \replace command to a LaTeX document using the 'changes' package"
+  (interactive)
+  (if (use-region-p)
+      (let ((low (region-beginning))
+            (high (region-end))
+            (command (concat "\\replaced[id=" mvr-changes-id  "]{}{")))
+        (goto-char high)
+        (insert "}")
+        (goto-char low)
+        (insert command)
+        (goto-char (- (point) 2))
+        (if (evil-mode)(evil-insert 0)))
+    (message "This command can only act on an active region")))
+#+end_src
+
+
 RefTeX enabled in AucTeX
 
 #+begin_src emacs-lisp
@@ -851,7 +898,9 @@ Relative / absolute numbering
                   "C-SPC" 'ace-jump-line-mode
                   "A"     'mark-all-like-this 
                   "N"     'mark-previous-like-this 
-                  "n"     'mark-more-like-this) 
+                  "n"     'mark-more-like-this
+                  "M-c"   'mvr-changes-replace
+                  "M-d"   'mvr-changes-delete)
      (fill-keymap evil-insert-state-map
                   "C-e" 'end-of-line
                    "M-'" 'ucs-insert)
@@ -899,6 +948,7 @@ Relative / absolute numbering
      "1" 'delete-other-windows
      "0" 'delete-window
      "o" 'other-window
+     "z" 'suspend-emacs
      "g" 'magit-status)
 #+end_src
 

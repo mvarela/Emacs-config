@@ -152,16 +152,18 @@
     (insert "}")
     ))
 
-(global-highlight-changes-mode t)
-(setq highlight-changes-visibility-initial-state nil)
+;   (global-highlight-changes-mode t)
+;   (setq highlight-changes-visibility-initial-state nil)
 
 (setq frame-title-format
   '("emacs%@" (:eval (system-name)) ": " (:eval (if (buffer-file-name)
                 (abbreviate-file-name (buffer-file-name))
                   "%b")) " [%*]"))
 
-(add-hook 'latex-mode-hook 'flyspell-mode)
-(add-hook 'org-mode-hook 'flyspell-mode)
+(add-hook 'latex-mode-hook 'turn-on-auto-fill)
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
+        ;; (add-hook 'latex-mode-hook 'flyspell-mode)
+        ;; (add-hook 'org-mode-hook 'flyspell-mode)
 
 (add-to-list 'auto-mode-alist '("\\.eml$" . message-mode))
 
@@ -582,6 +584,12 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
    "R" 'mvr-evil-nu
    "l" 'linum-mode
    "d" 'edit-server-done
+   "3" 'split-window-horizontally
+   "2" 'split-window-vertically
+   "1" 'delete-other-windows
+   "0" 'delete-window
+   "o" 'other-window
+   "z" 'suspend-emacs
    "g" 'magit-status)
 
 (defvar my-linum-format-string "%4d ")
