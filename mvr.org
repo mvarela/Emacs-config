@@ -24,8 +24,8 @@
 *** Color theme and chooser functions
     #+begin_src emacs-lisp
 (add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
-(load-theme 'tiago t)
-;;(load-theme 'zenburn t)
+;;(load-theme 'tiago t)
+(load-theme 'zenburn t)
     #+end_src
 
 
@@ -229,6 +229,15 @@ each header, and then converts that to a FreeMind mindmap.
 
 #+end_src
 
+
+** Create a new scratch buffer
+
+#+begin_src emacs-lisp
+(defun mvr-new-scratch-buffer ()
+  (interactive)
+  (switch-to-buffer (concat "**scratch-" (format-time-string "%Y-%m-%d %H:%M" (current-time)) (format "--%s" (random 1000)) "**"))
+  (lisp-mode))
+#+end_src
 * Personalized options for different modes and packages
 
 
@@ -424,6 +433,14 @@ This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html]
   (setq org-google-weather-icon-directory (concat mvr-elisp-root "/src/google-weather-el/icons/"))
 #+end_src
 
+*** Org-bullets
+
+#+begin_src emacs-lisp
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-bullets-mode)
+#+end_src
+
+ 
 ** Ido-mode
 
 *** Interactive do, find-file and iswitchb replacement with fuzzy/flex matching.
@@ -587,8 +604,8 @@ Quick helper functions for using 'changes' mode
 (defun mvr-changes-add ()
 "Inserts an \added command to a LaTeX document using the 'changes' package"
   (interactive)
-    (insert (concat "\\added[id=" mvr-changes-id  "]{}"))
-    (goto-char (- (point) 1))
+    (insert (concat "\\added[id=" mvr-changes-id  "]{} "))
+    (goto-char (- (point) 2))
         (if (evil-mode)(evil-insert 0)))
 
 (defun mvr-changes-delete ()
@@ -892,7 +909,7 @@ Break a line (inverse of 'J')
                   "M-t"   'transpose-words 
                   "C-:"   'eval-expression
                   "M-a"   'mvr-changes-add) 
-
+  
      (fill-keymap evil-motion-state-map
                   "_"     'evil-first-non-blank
                   "C-e"   'end-of-line
@@ -943,7 +960,7 @@ Break a line (inverse of 'J')
    (evil-leader/set-key
      "b" 'ido-switch-buffer
      "B" 'ibuffer
-     "k" 'kill-buffer 
+     "k" 'kill-this-buffer 
      "m" 'compile
      "s" 'save-buffer
      "f" 'ido-find-file
@@ -961,6 +978,7 @@ Break a line (inverse of 'J')
      "o" 'other-window
      "z" 'suspend-emacs
      "J" 'mvr-evil-break-line
+     "n" 'mvr-new-scratch-buffer
      "g" 'magit-status)
 #+end_src
 
@@ -995,6 +1013,13 @@ Break a line (inverse of 'J')
 (require 'projectile)
 (projectile-global-mode)
 #+end_src
+** Powerline
+
+#+begin_src emacs-lisp
+(require 'powerline)
+(powerline-default)
+#+end_src
+ 
 ** Rinari and RHTML
 
 #+begin_src emacs-lisp
