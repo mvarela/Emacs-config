@@ -5,10 +5,11 @@
                             "martin.varela@vtt.fi" 
                           "mvr.rennes@gmail.com"))
 (setq mvr-elisp-root "~/.emacs.d")
+(setq default-directory "/Users/mvr/.emacs.d/")
 
 (add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
-(load-theme 'tiago t)
-;;(load-theme 'zenburn t)
+;;(load-theme 'tiago t)
+(load-theme 'zenburn t)
 
 (defun make-frame-transparent ()
   (interactive)
@@ -152,6 +153,15 @@
     (insert "}")
     ))
 
+(defun mvr-new-scratch-buffer ()
+  (interactive)
+  (switch-to-buffer (concat "**scratch-" (format-time-string "%Y-%m-%d %H:%M" (current-time)) (format "--%s" (random 1000)) "**"))
+  (lisp-mode))
+
+(defun mvr-AC-on()
+     (interactive)
+      (auto-complete-mode t))
+
 ;   (global-highlight-changes-mode t)
 ;   (setq highlight-changes-visibility-initial-state nil)
 
@@ -160,7 +170,7 @@
                 (abbreviate-file-name (buffer-file-name))
                   "%b")) " [%*]"))
 
-(add-hook 'latex-mode-hook 'turn-on-auto-fill)
+(add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
         ;; (add-hook 'latex-mode-hook 'flyspell-mode)
         ;; (add-hook 'org-mode-hook 'flyspell-mode)
@@ -268,6 +278,9 @@
 
 (require 'org-google-weather)
 (setq org-google-weather-icon-directory (concat mvr-elisp-root "/src/google-weather-el/icons/"))
+
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-bullets-mode)
 
 (ido-mode t)
 (ido-everywhere 1)
@@ -385,11 +398,51 @@
  )))
   (setq-default ispell-program-name "aspell")
 
+(setq mvr-changes-id "mvr")
+(defun mvr-changes-add ()
+"Inserts an \added command to a LaTeX document using the 'changes' package"
+  (interactive)
+    (insert (concat "\\added[id=" mvr-changes-id  "]{} "))
+    (goto-char (- (point) 2))
+        (if (evil-mode)(evil-insert 0)))
+
+(defun mvr-changes-delete ()
+  "Inserts an \delete command to a LaTeX document using the 'changes' package"
+  (interactive)
+  (if (use-region-p)
+      (save-excursion
+        (let ((low (region-beginning))
+              (high (region-end))
+               (command (concat "\\deleted[id=" mvr-changes-id  "]{")))
+        (goto-char high)
+        (insert "}")
+        (goto-char low)
+        (insert command)))
+    (message "This command can only act on an active region")))
+
+
+
+(defun mvr-changes-replace ()
+  "Inserts an \replace command to a LaTeX document using the 'changes' package"
+  (interactive)
+  (if (use-region-p)
+      (let ((low (region-beginning))
+            (high (region-end))
+            (command (concat "\\replaced[id=" mvr-changes-id  "]{}{")))
+        (goto-char high)
+        (insert "}")
+        (goto-char low)
+        (insert command)
+        (goto-char (- (point) 2))
+        (if (evil-mode)(evil-insert 0)))
+    (message "This command can only act on an active region")))
+
 (setq reftex-plug-into-AUCTeX t)
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 
 (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
 (setq TeX-source-correlate-method 'synctex)
+(setq-default TeX-master nil)
 (add-hook 'LaTeX-mode-hook (lambda ()
 (add-to-list 'TeX-expand-list
                '("%q" skim-make-url))))
@@ -443,12 +496,9 @@
      "\n"
       (if (= (user-uid) 0) "# " "$ "))))
 
-(autoload 'forth-mode "gforth.el")
-(autoload 'forth-block-mode "gforth.el")
-(add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
-
-; commented, as using evil-mode this can easily be done with marks
-;(require 'breadcrumb)
+;;(autoload 'forth-mode "gforth.el")
+;;(autoload 'forth-block-mode "gforth.el")
+;;(add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
 
 (require 'ace-jump-mode)
 
@@ -509,88 +559,105 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 ;;(add-hook 'evil-insert-state-entry-hook 'mvr-evil-nu)
 ;;(add-hook 'evil-normal-state-entry-hook 'mvr-evil-rnu)
 
+(defun mvr-evil-break-line()
+  "splits a line"
+  (interactive)
+  (save-excursion (insert "\n")))
+
 (require 'evil-numbers)
-   (setq evil-leader/leader ",")
-   (require 'evil-leader)
-   (require 'evil)
-   (evil-mode 1)
-   (fill-keymap evil-normal-state-map
-                "+"     'evil-numbers/inc-at-pt
-                "-"     'evil-numbers/dec-at-pt
-                "SPC"   'ace-jump-char-mode
-                "S-SPC" 'ace-jump-word-mode
-                "C-SPC" 'ace-jump-line-mode
-                "go"    'goto-char
-                "C-t"   'transpose-chars
-                "M-t"   'transpose-words 
-                "C-:"   'eval-expression)
+     (setq evil-leader/leader ",")
+     (require 'evil-leader)
+     (require 'evil)
+     (evil-mode 1)
+     (fill-keymap evil-normal-state-map
+                  "+"     'evil-numbers/inc-at-pt
+                  "-"     'evil-numbers/dec-at-pt
+                  "SPC"   'ace-jump-char-mode
+                  "S-SPC" 'ace-jump-word-mode
+                  "C-SPC" 'ace-jump-line-mode
+                  "go"    'goto-char
+                  "C-t"   'transpose-chars
+                  "M-t"   'transpose-words 
+                  "C-:"   'eval-expression
+                  "M-a"   'mvr-changes-add) 
+  
+     (fill-keymap evil-motion-state-map
+                  "_"     'evil-first-non-blank
+                  "C-e"   'end-of-line
+                  "C-S-d" 'evil-scroll-up
+                  "C-S-f" 'evil-scroll-page-up
+                  "_"     'evil-first-non-blank
+                  "C-y"   nil)
+     
+  (fill-keymap evil-visual-state-map
+                  "/"     'comment-or-uncomment-region
+                  "\\"     'indent-region
+                  "SPC"   'ace-jump-char-mode
+                  "S-SPC" 'ace-jump-word-mode
+                  "C-SPC" 'ace-jump-line-mode
+                  "A"     'mark-all-like-this 
+                  "N"     'mark-previous-like-this 
+                  "n"     'mark-more-like-this
+                  "M-c"   'mvr-changes-replace
+                  "M-d"   'mvr-changes-delete)
+     (fill-keymap evil-insert-state-map
+                  "C-e" 'end-of-line
+                   "M-'" 'ucs-insert)
+   (evil-declare-key 'normal org-mode-map
+     (kbd "RET") 'org-open-at-point
+     "za"        'org-cycle
+     "zA"        'org-shifttab
+     "zm"        'hide-body
+     "zr"        'show-all
+     "zo"        'show-subtree
+     "zO"        'show-all
+     "zc"        'hide-subtree
+     "zC"        'hide-all
+     (kbd "M-j") 'org-shiftleft
+     (kbd "M-k") 'org-shiftright
+     (kbd "M-H") 'org-metaleft
+     (kbd "M-J") 'org-metadown
+     (kbd "M-K") 'org-metaup
+     (kbd "M-L") 'org-metaright)
    
-   (fill-keymap evil-motion-state-map
-                "_"     'evil-first-non-blank
-                "C-e"   'end-of-line
-                "C-S-d" 'evil-scroll-up
-                "C-S-f" 'evil-scroll-page-up
-                "_"     'evil-first-non-blank
-                "C-y"   nil)
-   
-(fill-keymap evil-visual-state-map
-                "/"     'comment-or-uncomment-region
-                "\\"     'indent-region
-                "SPC"   'ace-jump-char-mode
-                "S-SPC" 'ace-jump-word-mode
-                "C-SPC" 'ace-jump-line-mode
-                "A"     'mark-all-like-this 
-                "N"     'mark-previous-like-this 
-                "n"     'mark-more-like-this) 
-   (fill-keymap evil-insert-state-map
-                "C-e" 'end-of-line
-                 "M-'" 'ucs-insert)
- (evil-declare-key 'normal org-mode-map
-   (kbd "RET") 'org-open-at-point
-   "za"        'org-cycle
-   "zA"        'org-shifttab
-   "zm"        'hide-body
-   "zr"        'show-all
-   "zo"        'show-subtree
-   "zO"        'show-all
-   "zc"        'hide-subtree
-   "zC"        'hide-all
-   (kbd "M-j") 'org-shiftleft
-   (kbd "M-k") 'org-shiftright
-   (kbd "M-H") 'org-metaleft
-   (kbd "M-J") 'org-metadown
-   (kbd "M-K") 'org-metaup
-   (kbd "M-L") 'org-metaright)
- 
- (evil-declare-key 'insert org-mode-map
-   (kbd "M-j") 'org-shiftleft
-   (kbd "M-k") 'org-shiftright
-   (kbd "M-H") 'org-metaleft
-   (kbd "M-J") 'org-metadown
-   (kbd "M-K") 'org-metaup
-   (kbd "M-L") 'org-metaright)  
-   
- (evil-leader/set-key
-   "b" 'ido-switch-buffer
-   "B" 'ibuffer
-   "k" 'kill-buffer 
-   "m" 'compile
-   "s" 'save-buffer
-   "f" 'ido-find-file
-   "SPC" 'ace-jump-word-mode
-   "q" 'fill-paragraph
-   "x" 'smex
-   "r" 'mvr-evil-rnu
-   "R" 'mvr-evil-nu
-   "l" 'linum-mode
-   "d" 'edit-server-done
-   "3" 'split-window-horizontally
-   "2" 'split-window-vertically
-   "1" 'delete-other-windows
-   "0" 'delete-window
-   "o" 'other-window
-   "z" 'suspend-emacs
-   "g" 'magit-status)
+   (evil-declare-key 'insert org-mode-map
+     (kbd "M-j") 'org-shiftleft
+     (kbd "M-k") 'org-shiftright
+     (kbd "M-H") 'org-metaleft
+     (kbd "M-J") 'org-metadown
+     (kbd "M-K") 'org-metaup
+     (kbd "M-L") 'org-metaright)  
+     
+   (evil-leader/set-key
+     "b" 'ido-switch-buffer
+     "B" 'ibuffer
+     "k" 'kill-this-buffer 
+     "m" 'compile
+     "s" 'save-buffer
+     "f" 'ido-find-file
+     "SPC" 'ace-jump-word-mode
+     "q" 'fill-paragraph
+     "x" 'smex
+     "r" 'mvr-evil-rnu
+     "R" 'mvr-evil-nu
+     "l" 'linum-mode
+     "d" 'edit-server-done
+     "3" 'split-window-horizontally
+     "2" 'split-window-vertically
+     "1" 'delete-other-windows
+     "0" 'delete-window
+     "o" 'other-window
+     "z" 'suspend-emacs
+     "J" 'mvr-evil-break-line
+     "n" 'mvr-new-scratch-buffer
+     "A" 'predictive-mode
+     "g" 'magit-status)
+
+(evil-define-key 'normal LaTeX-mode-map "%" 'predictive-latex-jump-to-matching-delimiter)
+(evil-define-key 'visual LaTeX-mode-map "%" 'predictive-latex-jump-to-matching-delimiter)
+
+(define-key minibuffer-local-map "\C-r" 'evil-paste-from-register)
+(evil-ex-define-cmd "\C-r" 'evil-paste-from-register)
 
 (defvar my-linum-format-string "%4d ")
 (setq linum-format "%4d ")
@@ -612,14 +679,41 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
     ad-do-it))
 (ad-activate 'linum-update)
 
-(require 'projectile)
-(projectile-global-mode)
+(require 'powerline)
+(powerline-default)
 
-(require 'rinari)
+;; (require 'rinari)
 ;;; rhtml-mode
-     (require 'rhtml-mode)
-     (add-hook 'rhtml-mode-hook
-          (lambda () (rinari-launch)))
+  ;;   (require 'rhtml-mode)
+  ;;   (add-hook 'rhtml-mode-hook
+  ;;      (lambda () (rinari-launch)))
+
+(require 'ess-site)
+
+;;(require 'auto-complete-config)
+;;(ac-config-default)
+;;(add-to-list 'ac-modes 'LaTeX-mode)
+;;(global-auto-complete-mode t)
+
+;;(defun mvr-completion-reject() (define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject))
+;;(autoload 'predictive-mode "predictive" "predictive" t)
+;;(add-hook 'predictive-mode 'mvr-completion-reject)
+(require 'predictive)
+(define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject)
+
+(require 'emms-setup)
+(require 'emms-player-mplayer)
+(setq emms-playlist-buffer-name "*Music*")
+(setq emms-source-file-default-directory "/Users/mvr/Music/mp3/")
+(emms-standard)
+(emms-default-players)
+(define-emms-simple-player mplayer '(file url)
+      (regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
+                    ".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
+                    ".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
+      "mplayer" "-slave" "-quiet" "-really-quiet" "-fullscreen")
+
+(set-face-attribute 'default nil :family "Monaco for Powerline" :height 120)
 
 (set-default 'fill-column 80)
 
@@ -658,14 +752,21 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 
 (fringe-mode 0)
 
-;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
-(if (eq system-type 'darwin) (progn (setenv "PATH" (concat
-"/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
-(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
-exec-path)
-(setq exec-path (append
-(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
-exec-path))))
+;;;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
+          ;;(if (eq system-type 'darwin) (progn (setenv "PATH" (concat
+          ;;"/Users/mvr/.rvm/rubies/ruby-1.9.3-p194/bin/ruby:/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
+          ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+          ;;exec-path)
+          ;;(setq exec-path (append
+          ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+          ;;exec-path))))
+;; fix the PATH variable
+(defun set-exec-path-from-shell-PATH ()
+  (let ((path-from-shell (shell-command-to-string "$SHELL -i -c 'echo $PATH' 2>/dev/null")))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(if (eq system-type 'darwin) (set-exec-path-from-shell-PATH))
 
 (defun ns-raise-emacs ()
   (ns-do-applescript "tell application \"Emacs\" to activate"))
@@ -675,6 +776,13 @@ exec-path))))
 (setq browse-url-browser-function 'browse-default-macosx-browser)
 
 (setq ns-pop-up-frames nil)
+
+(defun mvr-toggle-fullscreen ()
+  "Toggle full screen"
+  (interactive)
+  (set-frame-parameter
+     nil 'fullscreen
+     (when (not (frame-parameter nil 'fullscreen)) 'fullboth)))
 
 (server-start)
 
@@ -712,6 +820,7 @@ exec-path))))
 (global-set-key (kbd "C-x t") 'toggle-transparency)
 
 (global-set-key (kbd "C-|") 'maximize-frame)
+(global-set-key (kbd "M-|") 'mvr-toggle-fullscreen)
 (global-set-key (kbd "C->") 'halve-frame-h)
 (global-set-key (kbd "C-<") 'halve-frame-v)
 
@@ -731,3 +840,8 @@ exec-path))))
 ;(global-set-key (kbd "M-[") 'bc-previous)
 
 (global-set-key (kbd "C-{") 'er/expand-region)
+
+(global-set-key (kbd "C-M-7") 'emms-previous) 
+(global-set-key (kbd "C-M-8") 'emms-pause) 
+(global-set-key (kbd "C-M-9") 'emms-next) 
+(global-set-key (kbd "C-M-0") 'emms-stop)

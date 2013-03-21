@@ -7,31 +7,32 @@
 * Personal information
 
   #+begin_src emacs-lisp
-(setq user-full-name "Martin Varela")
-(setq user-mail-address (
-                         if (string= (system-name) "mvr-cnl") 
-                            "martin.varela@vtt.fi" 
-                          "mvr.rennes@gmail.com"))
-(setq mvr-elisp-root "~/.emacs.d")
-
+    (setq user-full-name "Martin Varela")
+    (setq user-mail-address (
+                             if (string= (system-name) "mvr-cnl") 
+                                "martin.varela@vtt.fi" 
+                              "mvr.rennes@gmail.com"))
+    (setq mvr-elisp-root "~/.emacs.d")
+    (setq default-directory "/Users/mvr/.emacs.d/")
+    
   #+end_src
-  
+
 
 * Local functions
 
 ** Screen Transparency and Color Themes
 
 *** Color theme and chooser functions
-    #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 (add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
 ;;(load-theme 'tiago t)
 (load-theme 'zenburn t)
-    #+end_src
+#+end_src
 
 
 *** Handling Transparency
 
-    #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 (defun make-frame-transparent ()
   (interactive)
   (set-frame-parameter nil 'alpha '(75 70)))
@@ -52,9 +53,9 @@
 	  (make-frame-opaque)
 	  (make-frame-transparent)))
 
-    #+end_src
+#+end_src
 
-    
+
 
 ** Printing
 
@@ -238,36 +239,44 @@ each header, and then converts that to a FreeMind mindmap.
   (switch-to-buffer (concat "**scratch-" (format-time-string "%Y-%m-%d %H:%M" (current-time)) (format "--%s" (random 1000)) "**"))
   (lisp-mode))
 #+end_src
+
+
+** Turn on AC
+#+begin_src emacs-lisp
+  (defun mvr-AC-on()
+       (interactive)
+        (auto-complete-mode t))
+#+end_src
 * Personalized options for different modes and packages
 
 
 ** Highlighting changes
 
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
   ;   (global-highlight-changes-mode t)
   ;   (setq highlight-changes-visibility-initial-state nil)
-   #+end_src
+#+end_src
 
 
 ** Frame titles
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
      (setq frame-title-format
        '("emacs%@" (:eval (system-name)) ": " (:eval (if (buffer-file-name)
                      (abbreviate-file-name (buffer-file-name))
                        "%b")) " [%*]"))
      
-   #+end_src
+#+end_src
 
-   
+
 ** Hooks for using text mode enhancements 
 
-   #+begin_src emacs-lisp
- (add-hook 'latex-mode-hook 'turn-on-auto-fill)
+#+begin_src emacs-lisp
+ (add-hook 'LaTeX-mode-hook 'turn-on-auto-fill)
  (add-hook 'org-mode-hook 'turn-on-auto-fill)
          ;; (add-hook 'latex-mode-hook 'flyspell-mode)
          ;; (add-hook 'org-mode-hook 'flyspell-mode)
-   #+end_src
-   
+#+end_src
+
 Handling ".eml" files in message-mode
 
 #+begin_src emacs-lisp
@@ -276,7 +285,7 @@ Handling ".eml" files in message-mode
 
 ** Haskell mode options
 
-   #+begin_src emacs-lisp 
+#+begin_src emacs-lisp 
           (starter-kit-load "starter-kit-haskell.org")
           
           (load "haskell-site-file")
@@ -290,18 +299,18 @@ Handling ".eml" files in message-mode
           ;;(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
           (add-hook 'haskell-mode-hook (lambda () (ghc-init) (flymake-mode)))
      ;     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
-   #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 
 ** Org-mode options
 
 *** Setup the org-agenda files to be considered
 
-    #+begin_src emacs-lisp
+#+begin_src emacs-lisp
       (setq diary-file (concat mvr-elisp-root "/diary/diary"))
       (setq org-agenda-include-diary t)
       (setq org-agenda-files (file-expand-wildcards (concat mvr-elisp-root "/org-agenda-files/*.org")))
-    #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 
 
@@ -332,7 +341,7 @@ Handling ".eml" files in message-mode
 
 This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html][this blog post]], with the display function replaced by my own.
 
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
 
 (setq
   appt-message-warning-time 20 ;; warn 15 min in advance
@@ -366,37 +375,37 @@ This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html]
 
 *** Ditaa jar location
 
-    #+begin_src emacs-lisp
+#+begin_src emacs-lisp
       (setq org-ditaa-jar-path
                 (concat mvr-elisp-root "/src/org/contrib/scripts/ditaa.jar"))
-     #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 
 *** Org-babel Gnuplot support
 
-    #+begin_src emacs-lisp 
+#+begin_src emacs-lisp 
              (org-babel-do-load-languages
               'org-babel-load-languages
                (cons '(gnuplot . t)
                   org-babel-load-languages))
-    #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 
 *** Org-babel org support
 
-    #+begin_src emacs-lisp 
+#+begin_src emacs-lisp 
       (org-babel-do-load-languages
       'org-babel-load-languages
       (cons '(org . t)
             org-babel-load-languages))
-    #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 
 *** Pretty indentation
 
-    #+begin_src emacs-lisp
+#+begin_src emacs-lisp
       (setq org-startup-indented t) 
-    #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 
 *** No validator link in HTML exports
@@ -440,7 +449,7 @@ This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html]
 (add-hook 'org-mode-hook 'org-bullets-mode)
 #+end_src
 
- 
+
 ** Ido-mode
 
 *** Interactive do, find-file and iswitchb replacement with fuzzy/flex matching.
@@ -655,6 +664,7 @@ modified slightly.
 
 (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
 (setq TeX-source-correlate-method 'synctex)
+(setq-default TeX-master nil)
 (add-hook 'LaTeX-mode-hook (lambda ()
 (add-to-list 'TeX-expand-list
 	       '("%q" skim-make-url))))
@@ -669,43 +679,43 @@ modified slightly.
 (if (eq system-type 'darwin)
     (setq TeX-view-program-selection '((output-pdf "Skim"))))
     
- #+end_src
+#+end_src
 
 
 Old stuff below:
 
-    ;; (custom-set-variables '(TeX-command-list 
-    ;;    (quote (
-    ;;            ("XeLaTeX_SyncteX" "%`xelatex --interaction=nonstopmode --synctex=1%(mode)%' %t" TeX-run-TeX
-    ;;    nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
-    ;;            ("XeLaTeX_NonStop" "%`xelatex --interaction=nonstopmode%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
-    ;;            ("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX") 
-    ;;            ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX") 
-    ;;            ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output") 
-    ;;            ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output") 
-    ;;            ("AmSTeX" "%(PDF)amstex %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (ams-tex-mode) :help "Run AMSTeX") 
-    ;;            ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once") 
-    ;;            ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion") 
-    ;;            ("BibTeX" "bibtex %s" TeX-run-BibTeX nil t :help "Run BibTeX") 
-    ;;            ("View" "%V" TeX-run-discard-or-function nil t :help "Run Viewer") 
-    ;;            ("Print" "%p" TeX-run-command t t :help "Print the file") 
-    ;;            ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command) 
-    ;;            ("File" "%(o?)dvips %d -o %f " TeX-run-command t t :help "Generate PostScript file") 
-    ;;            ("Index" "makeindex %s" TeX-run-command nil t :help "Create index file") 
-    ;;            ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness") 
-    ;;            ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document") 
-    ;;            ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files") 
-    ;;            ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files") 
-    ;;            ("Other" "" TeX-run-command t t :help "Run an arbitrary command") 
-    ;;            ("Jump to PDF" "%V" TeX-run-discard-or-function nil t :help "Run Viewer")))))
-    
-    
-    ;; (custom-set-variables
-    ;;  '(LaTeX-command "xelatex  --interaction=nonstopmode --synctex=1")
-    ;;  '(TeX-view-program-list (quote (("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b") ("Preview" "open -a Preview.app %o"))))
-    ;; )
-    ;; (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
-    ;; (setq TeX-source-correlate-method 'synctex)
+;; (custom-set-variables '(TeX-command-list 
+;;    (quote (
+;;            ("XeLaTeX_SyncteX" "%`xelatex --interaction=nonstopmode --synctex=1%(mode)%' %t" TeX-run-TeX
+;;    nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
+;;            ("XeLaTeX_NonStop" "%`xelatex --interaction=nonstopmode%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run XeLaTeX") 
+;;            ("TeX" "%(PDF)%(tex) %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (plain-tex-mode texinfo-mode ams-tex-mode) :help "Run plain TeX") 
+;;            ("LaTeX" "%`%l%(mode)%' %t" TeX-run-TeX nil (latex-mode doctex-mode) :help "Run LaTeX") 
+;;            ("Makeinfo" "makeinfo %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with Info output") 
+;;            ("Makeinfo HTML" "makeinfo --html %t" TeX-run-compile nil (texinfo-mode) :help "Run Makeinfo with HTML output") 
+;;            ("AmSTeX" "%(PDF)amstex %`%S%(PDFout)%(mode)%' %t" TeX-run-TeX nil (ams-tex-mode) :help "Run AMSTeX") 
+;;            ("ConTeXt" "texexec --once --texutil %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt once") 
+;;            ("ConTeXt Full" "texexec %(execopts)%t" TeX-run-TeX nil (context-mode) :help "Run ConTeXt until completion") 
+;;            ("BibTeX" "bibtex %s" TeX-run-BibTeX nil t :help "Run BibTeX") 
+;;            ("View" "%V" TeX-run-discard-or-function nil t :help "Run Viewer") 
+;;            ("Print" "%p" TeX-run-command t t :help "Print the file") 
+;;            ("Queue" "%q" TeX-run-background nil t :help "View the printer queue" :visible TeX-queue-command) 
+;;            ("File" "%(o?)dvips %d -o %f " TeX-run-command t t :help "Generate PostScript file") 
+;;            ("Index" "makeindex %s" TeX-run-command nil t :help "Create index file") 
+;;            ("Check" "lacheck %s" TeX-run-compile nil (latex-mode) :help "Check LaTeX file for correctness") 
+;;            ("Spell" "(TeX-ispell-document \"\")" TeX-run-function nil t :help "Spell-check the document") 
+;;            ("Clean" "TeX-clean" TeX-run-function nil t :help "Delete generated intermediate files") 
+;;            ("Clean All" "(TeX-clean t)" TeX-run-function nil t :help "Delete generated intermediate and output files") 
+;;            ("Other" "" TeX-run-command t t :help "Run an arbitrary command") 
+;;            ("Jump to PDF" "%V" TeX-run-discard-or-function nil t :help "Run Viewer")))))
+
+
+;; (custom-set-variables
+;;  '(LaTeX-command "xelatex  --interaction=nonstopmode --synctex=1")
+;;  '(TeX-view-program-list (quote (("Skim" "/Applications/Skim.app/Contents/SharedSupport/displayline %n %o %b") ("Preview" "open -a Preview.app %o"))))
+;; )
+;; (add-hook 'LaTeX-mode-hook 'TeX-source-correlate-mode)
+;; (setq TeX-source-correlate-method 'synctex)
 
 
 For RefTex TOC generation, use a horizontal window split
@@ -787,19 +797,11 @@ Set the prompt closer to the one I use in Bash
 Just set the autoload options.
 
 #+begin_src emacs-lisp
-  (autoload 'forth-mode "gforth.el")
-  (autoload 'forth-block-mode "gforth.el")
-  (add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
+  ;;(autoload 'forth-mode "gforth.el")
+  ;;(autoload 'forth-block-mode "gforth.el")
+  ;;(add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
 #+end_src
 
-
-
-** Breadcrumb
-
-#+begin_src emacs-lisp
-; commented, as using evil-mode this can easily be done with marks
-;(require 'breadcrumb)
-#+end_src
 
 
 ** Ace-jump
@@ -979,7 +981,18 @@ Break a line (inverse of 'J')
      "z" 'suspend-emacs
      "J" 'mvr-evil-break-line
      "n" 'mvr-new-scratch-buffer
+     "A" 'predictive-mode
      "g" 'magit-status)
+
+(evil-define-key 'normal LaTeX-mode-map "%" 'predictive-latex-jump-to-matching-delimiter)
+(evil-define-key 'visual LaTeX-mode-map "%" 'predictive-latex-jump-to-matching-delimiter)
+#+end_src
+
+Copy from registers to the minibuffer or ex line
+
+#+begin_src emacs-lisp
+(define-key minibuffer-local-map "\C-r" 'evil-paste-from-register)
+(evil-ex-define-cmd "\C-r" 'evil-paste-from-register)
 #+end_src
 
 ** Linum
@@ -1007,48 +1020,84 @@ Break a line (inverse of 'J')
 (ad-activate 'linum-update)
 
 #+end_src 
-** Projectile
-
-#+begin_src emacs-lisp
-(require 'projectile)
-(projectile-global-mode)
-#+end_src
 ** Powerline
 
 #+begin_src emacs-lisp
 (require 'powerline)
 (powerline-default)
 #+end_src
- 
+
 ** Rinari and RHTML
 
 #+begin_src emacs-lisp
- (require 'rinari)
+;; (require 'rinari)
 ;;; rhtml-mode
-     (require 'rhtml-mode)
-     (add-hook 'rhtml-mode-hook
-     	  (lambda () (rinari-launch)))
+  ;;   (require 'rhtml-mode)
+  ;;   (add-hook 'rhtml-mode-hook
+  ;;   	  (lambda () (rinari-launch)))
+#+end_src 
+
+** ESS mode
+#+begin_src emacs-lisp
+ (require 'ess-site)
+#+end_src 
+
+** Autocomplete
+
+#+begin_src emacs-lisp
+;;(require 'auto-complete-config)
+;;(ac-config-default)
+;;(add-to-list 'ac-modes 'LaTeX-mode)
+;;(global-auto-complete-mode t)
+#+end_src
+
+** Predictive-mode
+#+begin_src emacs-lisp
+;;(defun mvr-completion-reject() (define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject))
+;;(autoload 'predictive-mode "predictive" "predictive" t)
+;;(add-hook 'predictive-mode 'mvr-completion-reject)
+(require 'predictive)
+(define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject)
+#+end_src
+
+** EMMS
+
+#+begin_src emacs-lisp
+(require 'emms-setup)
+(require 'emms-player-mplayer)
+(setq emms-playlist-buffer-name "*Music*")
+(setq emms-source-file-default-directory "/Users/mvr/Music/mp3/")
+(emms-standard)
+(emms-default-players)
+(define-emms-simple-player mplayer '(file url)
+      (regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
+                    ".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
+                    ".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
+      "mplayer" "-slave" "-quiet" "-really-quiet" "-fullscreen")
 #+end_src 
 * Misc. Settings
-
+** Fonts
+#+begin_src emacs-lisp
+(set-face-attribute 'default nil :family "Monaco for Powerline" :height 120)
+#+end_src
 ** Line-wrapping
 
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
      (set-default 'fill-column 80)
-   #+end_src
+#+end_src
 
 ** Don't truncate lines
 
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
      (setq truncate-lines t)
      (setq truncate-partial-width-windows nil)
-   #+end_src
+#+end_src
 
 ** Column numbers
 
-   #+begin_src emacs-lisp 
+#+begin_src emacs-lisp 
      (setq column-number-mode t)
-   #+end_src emacs-lisp
+#+end_src emacs-lisp
 
 ** History
 
@@ -1088,9 +1137,9 @@ Reload files that were modified on disk.
 #+end_src
 
 ** Window systems -- remove visual cruft                             :visual:
-   :PROPERTIES:
-   :CUSTOM_ID: window-system
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: window-system
+:END:
 #+srcname: starter-kit-window-view-stuff-recommended
 #+begin_src emacs-lisp 
 (when window-system
@@ -1127,7 +1176,7 @@ You really don't need this; trust me.
 #+end_src
 
 ** Fringe
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
    (fringe-mode 0)
 #+end_src
 * OS X-specific settings
@@ -1135,32 +1184,39 @@ You really don't need this; trust me.
 
 ** OS X workaround for missing PATH data
 
-   #+begin_src emacs-lisp
-          ;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
-          (if (eq system-type 'darwin) (progn (setenv "PATH" (concat
-          "/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
-          (list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
-          exec-path)
-          (setq exec-path (append
-          (list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
-          exec-path))))
-   #+end_src
+#+begin_src emacs-lisp
+          ;;;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
+          ;;(if (eq system-type 'darwin) (progn (setenv "PATH" (concat
+          ;;"/Users/mvr/.rvm/rubies/ruby-1.9.3-p194/bin/ruby:/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
+          ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+          ;;exec-path)
+          ;;(setq exec-path (append
+          ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+          ;;exec-path))))
+;; fix the PATH variable
+(defun set-exec-path-from-shell-PATH ()
+  (let ((path-from-shell (shell-command-to-string "$SHELL -i -c 'echo $PATH' 2>/dev/null")))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(if (eq system-type 'darwin) (set-exec-path-from-shell-PATH))
+#+end_src
 
 
 ** OS X Raise Emacs Frame
 
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
      (defun ns-raise-emacs ()
        (ns-do-applescript "tell application \"Emacs\" to activate"))
-   #+end_src
+#+end_src
 
 
 
 ** OS X Use CMD as META
 
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
      (setq ns-command-modifier (quote meta))
-   #+end_src
+#+end_src
 
 ** OS X Browser
 
@@ -1175,13 +1231,23 @@ You really don't need this; trust me.
   (setq ns-pop-up-frames nil)
 #+end_src
 
+** Fullscreen support
+ #+begin_src emacs-lisp
+
+(defun mvr-toggle-fullscreen ()
+  "Toggle full screen"
+  (interactive)
+  (set-frame-parameter
+     nil 'fullscreen
+     (when (not (frame-parameter nil 'fullscreen)) 'fullboth)))
+#+end_src
 * Emacs server
 
-  #+begin_src emacs-lisp
+#+begin_src emacs-lisp
     (server-start)
-  #+end_src
+#+end_src
 
- Add the edit-server for Chrome
+Add the edit-server for Chrome
 
 #+begin_src emacs-lisp
  (require 'edit-server)
@@ -1190,7 +1256,7 @@ You really don't need this; trust me.
 #+end_src
 
 * Bindings
-  
+
 ** Misc bindings
 
 *** Clipboard management
@@ -1198,19 +1264,19 @@ You really don't need this; trust me.
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-c v") 'clipboard-yank)
   (global-set-key (kbd "C-c c") 'clipboard-kill-ring-save)
- #+end_src
+#+end_src
 
 *** Go to a line
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
       (global-set-key (kbd "M-g") 'goto-line)
- #+end_src
+#+end_src
 
 *** Steve Yegge's bindings for backward-kill-word and my replacement for kill-region
 
- #+begin_src emacs-lisp
+#+begin_src emacs-lisp
    (global-set-key (kbd "C-w") 'backward-kill-word)
    (global-set-key (kbd "C-c w") 'kill-region)
- #+end_src
+#+end_src
 
 *** Printing
 
@@ -1229,9 +1295,9 @@ You really don't need this; trust me.
 
 *** Window management
 
-   Window shortcuts lifted from some guy's config... 
+Window shortcuts lifted from some guy's config... 
 
-   #+begin_src emacs-lisp
+#+begin_src emacs-lisp
      ;; Map the window manipulation keys to meta 0, 1, 2, o
      (global-set-key (kbd "M-3") 'split-window-horizontally) ; was digit-argument
      (global-set-key (kbd "M-2") 'split-window-vertically) ; was digit-argument
@@ -1245,12 +1311,13 @@ You really don't need this; trust me.
      (windmove-default-keybindings 'meta)
      
      (global-set-key (kbd "C-x t") 'toggle-transparency)
-   #+end_src
+#+end_src
 
 
 *** Maximize frame
 #+begin_src emacs-lisp
  (global-set-key (kbd "C-|") 'maximize-frame)
+ (global-set-key (kbd "M-|") 'mvr-toggle-fullscreen)
  (global-set-key (kbd "C->") 'halve-frame-h)
  (global-set-key (kbd "C-<") 'halve-frame-v)
 #+end_src
@@ -1288,4 +1355,13 @@ You really don't need this; trust me.
 *** Expand Region
 #+begin_src emacs-lisp
 (global-set-key (kbd "C-{") 'er/expand-region)
+#+end_src
+
+*** EMMS
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-M-7") 'emms-previous) 
+  (global-set-key (kbd "C-M-8") 'emms-pause) 
+  (global-set-key (kbd "C-M-9") 'emms-next) 
+  (global-set-key (kbd "C-M-0") 'emms-stop) 
 #+end_src
