@@ -8,6 +8,7 @@
 (setq default-directory "/Users/mvr/.emacs.d/")
 
 (add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
+(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/emacs-color-themes/themes/"))
 ;;(load-theme 'tiago t)
 (load-theme 'zenburn t)
 
@@ -191,57 +192,59 @@
      (add-hook 'haskell-mode-hook (lambda () (ghc-init) (flymake-mode)))
 ;     (add-to-list 'haskell-mode-hook '(auto-fill-mode -1))
 
-(setq diary-file (concat mvr-elisp-root "/diary/diary"))
-(setq org-agenda-include-diary t)
-(setq org-agenda-files (file-expand-wildcards (concat mvr-elisp-root "/org-agenda-files/*.org")))
+;      (setq diary-file (concat mvr-elisp-root "/diary/diary"))
+;      (setq org-agenda-include-diary t)
+;      (setq org-agenda-files (file-expand-wildcards (concat mvr-elisp-root "/org-agenda-files/*.org")))
 
-(require 'org-mac-iCal)
-(setq org-agenda-custom-commands
-      '(("I" "Import diary from iCal" agenda ""
-         ((org-agenda-mode-hook
-           (lambda ()
-             (org-mac-iCal)))))))
+;(require 'org-mac-iCal)
+;(setq org-agenda-custom-commands
+      ;'(("I" "Import diary from iCal" agenda ""
+         ;((org-agenda-mode-hook
+           ;(lambda ()
+             ;(org-mac-iCal)))))))
+;
+;(add-hook 'org-agenda-cleanup-fancy-diary-hook
+          ;(lambda ()
+            ;(goto-char (point-min))
+            ;(save-excursion
+              ;(while (re-search-forward "^[a-z]" nil t)
+                ;(goto-char (match-beginning 0))
+                ;(insert "0:00-24:00 ")))
+            ;(while (re-search-forward "^ [a-z]" nil t)
+              ;(goto-char (match-beginning 0))
+              ;(save-excursion
+                ;(re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
+              ;(insert (match-string 0)))))
 
-(add-hook 'org-agenda-cleanup-fancy-diary-hook
-          (lambda ()
-            (goto-char (point-min))
-            (save-excursion
-              (while (re-search-forward "^[a-z]" nil t)
-                (goto-char (match-beginning 0))
-                (insert "0:00-24:00 ")))
-            (while (re-search-forward "^ [a-z]" nil t)
-              (goto-char (match-beginning 0))
-              (save-excursion
-                (re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
-              (insert (match-string 0)))))
-
-(setq
-  appt-message-warning-time 20 ;; warn 15 min in advance
-
-  appt-display-mode-line t     ;; show in the modeline
-  appt-display-format 'window) ;; use our func
-(appt-activate 1)              ;; active appt (appointment notification)
-(display-time)                 ;; time display is required for this...
-
- ;; update appt each time agenda opened
-
-(add-hook 'org-finalize-agenda-hook 'org-agenda-to-appt)
-
-
-(defun mvr-display-appt (minutes current-time msg)
-  "Display appt messages"
-  (let ((gmsg 
-         (if (null (listp msg))
-             (format "In %s minutes: \n\t%s" minutes msg )
-             (format "In %s minutes: \n\t%s" 
-                     (if (listp minutes) 
-                         (car minutes)
-                       (minutes)) 
-                     (concat 
-                      (mapconcat '(lambda (x) (identity x)) msg "\n\t" ) "\n")))))
-    (growl "Reminder" gmsg)))
-
-(setq appt-disp-window-function (function mvr-display-appt))
+;
+;(setq
+  ;appt-message-warning-time 20 ;; warn 15 min in advance
+;
+  ;appt-display-mode-line t     ;; show in the modeline
+  ;appt-display-format 'window) ;; use our func
+;(appt-activate 1)              ;; active appt (appointment notification)
+;(display-time)                 ;; time display is required for this...
+;
+ ;;; update appt each time agenda opened
+;
+;(add-hook 'org-finalize-agenda-hook 'org-agenda-to-appt)
+;
+;
+;(defun mvr-display-appt (minutes current-time msg)
+  ;"Display appt messages"
+  ;(let ((gmsg 
+         ;(if (null (listp msg))
+             ;(format "In %s minutes: \n\t%s" minutes msg )
+             ;(format "In %s minutes: \n\t%s" 
+                     ;(if (listp minutes) 
+                         ;(car minutes)
+                       ;(minutes)) 
+                     ;(concat 
+                      ;(mapconcat '(lambda (x) (identity x)) msg "\n\t" ) "\n")))))
+    ;(growl "Reminder" gmsg)))
+;
+;(setq appt-disp-window-function (function mvr-display-appt))
+;
 
 (setq org-ditaa-jar-path
           (concat mvr-elisp-root "/src/org/contrib/scripts/ditaa.jar"))
@@ -397,6 +400,13 @@
            ispell-silently-savep t
  )))
   (setq-default ispell-program-name "aspell")
+
+(defun mvr-align-latex-table-region ()
+  (interactive)
+  (if (use-region-p)
+      (save-excursion
+        (align-regexp (region-beginning) (region-end) "\\(\\s-*\\)&" 1 1 t))
+    (message "This command can only act on an active region")))
 
 (setq mvr-changes-id "mvr")
 (defun mvr-changes-add ()
@@ -659,6 +669,10 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 (define-key minibuffer-local-map "\C-r" 'evil-paste-from-register)
 (evil-ex-define-cmd "\C-r" 'evil-paste-from-register)
 
+(setq evil-insert-state-cursor '("red" (bar . 2)))
+(setq evil-visual-state-cursor '("blue" box))
+(setq evil-normal-state-cursor '("orange" box))
+
 (defvar my-linum-format-string "%4d ")
 (setq linum-format "%4d ")
 (add-hook 'linum-before-numbering-hook 'my-linum-get-format-string)
@@ -707,11 +721,11 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 (setq emms-source-file-default-directory "/Users/mvr/Music/mp3/")
 (emms-standard)
 (emms-default-players)
-(define-emms-simple-player mplayer '(file url)
-      (regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
-                    ".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
-                    ".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
-      "mplayer" "-slave" "-quiet" "-really-quiet" "-fullscreen")
+;;(define-emms-simple-player mplayer '(file url)
+      ;;(regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
+                    ;;".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
+                    ;;".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
+      ;;"mplayer" "-slave" "-quiet" "-really-quiet" "-vo null")
 
 (set-face-attribute 'default nil :family "Monaco for Powerline" :height 120)
 

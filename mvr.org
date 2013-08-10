@@ -25,6 +25,7 @@
 *** Color theme and chooser functions
 #+begin_src emacs-lisp
 (add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/tiago-theme/"))
+(add-to-list 'custom-theme-load-path (concat mvr-elisp-root "/src/emacs-color-themes/themes/"))
 ;;(load-theme 'tiago t)
 (load-theme 'zenburn t)
 #+end_src
@@ -307,9 +308,9 @@ Handling ".eml" files in message-mode
 *** Setup the org-agenda files to be considered
 
 #+begin_src emacs-lisp
-      (setq diary-file (concat mvr-elisp-root "/diary/diary"))
-      (setq org-agenda-include-diary t)
-      (setq org-agenda-files (file-expand-wildcards (concat mvr-elisp-root "/org-agenda-files/*.org")))
+;      (setq diary-file (concat mvr-elisp-root "/diary/diary"))
+;      (setq org-agenda-include-diary t)
+;      (setq org-agenda-files (file-expand-wildcards (concat mvr-elisp-root "/org-agenda-files/*.org")))
 #+end_src emacs-lisp
 
 
@@ -317,60 +318,60 @@ Handling ".eml" files in message-mode
 *** Org-agenda and iCal integration
 
 #+begin_src emacs-lisp
-(require 'org-mac-iCal)
-(setq org-agenda-custom-commands
-      '(("I" "Import diary from iCal" agenda ""
-         ((org-agenda-mode-hook
-           (lambda ()
-             (org-mac-iCal)))))))
-
-(add-hook 'org-agenda-cleanup-fancy-diary-hook
-          (lambda ()
-            (goto-char (point-min))
-            (save-excursion
-              (while (re-search-forward "^[a-z]" nil t)
-                (goto-char (match-beginning 0))
-                (insert "0:00-24:00 ")))
-            (while (re-search-forward "^ [a-z]" nil t)
-              (goto-char (match-beginning 0))
-              (save-excursion
-                (re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
-              (insert (match-string 0)))))
+;(require 'org-mac-iCal)
+;(setq org-agenda-custom-commands
+      ;'(("I" "Import diary from iCal" agenda ""
+         ;((org-agenda-mode-hook
+           ;(lambda ()
+             ;(org-mac-iCal)))))))
+;
+;(add-hook 'org-agenda-cleanup-fancy-diary-hook
+          ;(lambda ()
+            ;(goto-char (point-min))
+            ;(save-excursion
+              ;(while (re-search-forward "^[a-z]" nil t)
+                ;(goto-char (match-beginning 0))
+                ;(insert "0:00-24:00 ")))
+            ;(while (re-search-forward "^ [a-z]" nil t)
+              ;(goto-char (match-beginning 0))
+              ;(save-excursion
+                ;(re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
+              ;(insert (match-string 0)))))
 #+end_src
 *** Org-agenda and appt integration
 
 This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html][this blog post]], with the display function replaced by my own.
 
 #+begin_src emacs-lisp
-
-(setq
-  appt-message-warning-time 20 ;; warn 15 min in advance
-
-  appt-display-mode-line t     ;; show in the modeline
-  appt-display-format 'window) ;; use our func
-(appt-activate 1)              ;; active appt (appointment notification)
-(display-time)                 ;; time display is required for this...
-
- ;; update appt each time agenda opened
-
-(add-hook 'org-finalize-agenda-hook 'org-agenda-to-appt)
-
-
-(defun mvr-display-appt (minutes current-time msg)
-  "Display appt messages"
-  (let ((gmsg 
-         (if (null (listp msg))
-             (format "In %s minutes: \n\t%s" minutes msg )
-             (format "In %s minutes: \n\t%s" 
-                     (if (listp minutes) 
-                         (car minutes)
-                       (minutes)) 
-                     (concat 
-                      (mapconcat '(lambda (x) (identity x)) msg "\n\t" ) "\n")))))
-    (growl "Reminder" gmsg)))
-
-(setq appt-disp-window-function (function mvr-display-appt))
-
+;
+;(setq
+  ;appt-message-warning-time 20 ;; warn 15 min in advance
+;
+  ;appt-display-mode-line t     ;; show in the modeline
+  ;appt-display-format 'window) ;; use our func
+;(appt-activate 1)              ;; active appt (appointment notification)
+;(display-time)                 ;; time display is required for this...
+;
+ ;;; update appt each time agenda opened
+;
+;(add-hook 'org-finalize-agenda-hook 'org-agenda-to-appt)
+;
+;
+;(defun mvr-display-appt (minutes current-time msg)
+  ;"Display appt messages"
+  ;(let ((gmsg 
+         ;(if (null (listp msg))
+             ;(format "In %s minutes: \n\t%s" minutes msg )
+             ;(format "In %s minutes: \n\t%s" 
+                     ;(if (listp minutes) 
+                         ;(car minutes)
+                       ;(minutes)) 
+                     ;(concat 
+                      ;(mapconcat '(lambda (x) (identity x)) msg "\n\t" ) "\n")))))
+    ;(growl "Reminder" gmsg)))
+;
+;(setq appt-disp-window-function (function mvr-display-appt))
+;
 #+end_src 
 
 *** Ditaa jar location
@@ -606,6 +607,16 @@ This was taken from [[http://emacs-fu.blogspot.com/2009/11/showing-pop-ups.html]
 
 ** LaTeX stuff
 
+Aligning tables
+
+#+begin_src emacs-lisp
+(defun mvr-align-latex-table-region ()
+  (interactive)
+  (if (use-region-p)
+      (save-excursion
+        (align-regexp (region-beginning) (region-end) "\\(\\s-*\\)&" 1 1 t))
+    (message "This command can only act on an active region")))
+#+end_src
 Quick helper functions for using 'changes' mode
 
 #+begin_src emacs-lisp
@@ -995,6 +1006,14 @@ Copy from registers to the minibuffer or ex line
 (evil-ex-define-cmd "\C-r" 'evil-paste-from-register)
 #+end_src
 
+Colored cursors
+
+#+begin_src emacs-lisp
+(setq evil-insert-state-cursor '("red" (bar . 2)))
+(setq evil-visual-state-cursor '("blue" box))
+(setq evil-normal-state-cursor '("orange" box))
+#+end_src
+
 ** Linum
 
 #+begin_src emacs-lisp
@@ -1069,11 +1088,11 @@ Copy from registers to the minibuffer or ex line
 (setq emms-source-file-default-directory "/Users/mvr/Music/mp3/")
 (emms-standard)
 (emms-default-players)
-(define-emms-simple-player mplayer '(file url)
-      (regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
-                    ".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
-                    ".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
-      "mplayer" "-slave" "-quiet" "-really-quiet" "-fullscreen")
+;;(define-emms-simple-player mplayer '(file url)
+      ;;(regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
+                    ;;".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
+                    ;;".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
+      ;;"mplayer" "-slave" "-quiet" "-really-quiet" "-vo null")
 #+end_src 
 * Misc. Settings
 ** Fonts
