@@ -266,7 +266,8 @@ interested in the actual code implementing the starter kit.
     (package-initialize)
     
     (defvar starter-kit-packages
-      (list 'yasnippet-bundle)
+     ;; (list 'yasnippet-bundle)
+      nil
       "Libraries that should be installed by default.")
     
     (unless package-archive-contents
@@ -371,17 +372,17 @@ everyone using the starter kit.
 
   load the yasnippet bundle
   #+begin_src emacs-lisp
-    (add-to-list 'load-path
-                 (expand-file-name  "yasnippet"
-                                    (expand-file-name "src"
-                                                      starter-kit-dir)))
-    (require 'yasnippet)
-    (yas/initialize)
+ ;;   (add-to-list 'load-path
+ ;;                (expand-file-name  "yasnippet"
+ ;;                                   (expand-file-name "src"
+ ;;                                                     starter-kit-dir)))
+ ;;   (require 'yasnippet)
+ ;;   (yas/initialize)
   #+end_src
 
   load the snippets defined in the =./snippets/= directory
   #+begin_src emacs-lisp
-    (yas/load-directory (expand-file-name "snippets" starter-kit-dir))
+   ;;    (yas/load-directory (expand-file-name "snippets" starter-kit-dir))
   #+end_src
 
   The latest version of yasnippets doesn't play well with Org-mode, the
@@ -390,14 +391,14 @@ everyone using the starter kit.
     (defun yas/org-very-safe-expand ()
       (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
     
-    (defun yas/org-setup ()
-      ;; yasnippet (using the new org-cycle hooks)
-      (make-variable-buffer-local 'yas/trigger-key)
-      (setq yas/trigger-key [tab])
-      (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-      (define-key yas/keymap [tab] 'yas/next-field))
-    
-    (add-hook 'org-mode-hook #'yas/org-setup)
+    (defun yas/org-setup ())
+  ;;    ;; yasnippet (using the new org-cycle hooks)
+  ;;    (make-variable-buffer-local 'yas/trigger-key)
+  ;;    (setq yas/trigger-key [tab])
+  ;;    (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+  ;;    (define-key yas/keymap [tab] 'yas/next-field))
+  ;;  
+  ;;  (add-hook 'org-mode-hook #'yas/org-setup)
   #+end_src
 
 ** Load User/System Specific Files

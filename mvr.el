@@ -12,25 +12,25 @@
 ;;(load-theme 'tiago t)
 (load-theme 'zenburn t)
 
-(defun make-frame-transparent ()
-  (interactive)
-  (set-frame-parameter nil 'alpha '(75 70)))
-
-(defun make-frame-opaque ()
-  (interactive)
-  (set-frame-parameter nil 'alpha '(100 100)))
-
-
-(set-frame-parameter (selected-frame) 'alpha '(100 100))
-(add-to-list 'default-frame-alist '(alpha 100 100))
-(eval-when-compile (require 'cl))
-(defun toggle-transparency ()
-  (interactive)
-  (if (/=
-           (cadr (frame-parameter nil 'alpha))
-           100)
-          (make-frame-opaque)
-          (make-frame-transparent)))
+;;(defun make-frame-transparent ()
+  ;;(interactive)
+  ;;(set-frame-parameter nil 'alpha '(75 70)))
+;;
+;;(defun make-frame-opaque ()
+  ;;(interactive)
+  ;;(set-frame-parameter nil 'alpha '(100 100)))
+;;
+;;
+;;(set-frame-parameter (selected-frame) 'alpha '(100 100))
+;;(add-to-list 'default-frame-alist '(alpha 100 100))
+;;(eval-when-compile (require 'cl))
+;;(defun toggle-transparency ()
+  ;;(interactive)
+  ;;(if (/=
+           ;;(cadr (frame-parameter nil 'alpha))
+           ;;100)
+          ;;(make-frame-opaque)
+          ;;(make-frame-transparent)))
 
 (defun print-to-pdf ()
   "Prints the current buffer to a pdf file"
@@ -91,10 +91,6 @@
                                                      2)))
   
 ;;  (maximize-frame)
-
-(defun shrink-window-two-thirds ()
-  (interactive)
-  (shrink-window-horizontally (truncate (* (get-frame-max-cols) 0.20))))
 
 (defun lorem ()
   (interactive)
@@ -159,9 +155,9 @@
   (switch-to-buffer (concat "**scratch-" (format-time-string "%Y-%m-%d %H:%M" (current-time)) (format "--%s" (random 1000)) "**"))
   (lisp-mode))
 
-(defun mvr-AC-on()
-     (interactive)
-      (auto-complete-mode t))
+;;(defun mvr-AC-on()
+     ;;(interactive)
+      ;;(auto-complete-mode t))
 
 ;   (global-highlight-changes-mode t)
 ;   (setq highlight-changes-visibility-initial-state nil)
@@ -261,9 +257,9 @@
 
 (setq org-startup-indented t)
 
-(setq org-export-html-validation-link nil)
+(setq org-html-validation-link nil)
 
-(setq org-export-latex-default-packages-alist  '(("" "fixltx2e" nil)
+(setq org-latex-default-packages-alist  '(("" "fixltx2e" nil)
                                                  ("" "graphicx" t)
                                                  ("" "longtable" nil)
                                                  ("" "float" nil)
@@ -277,6 +273,8 @@
                                                  ("" "fontspec" t)
                                                  ("" "natbib" t)
                                                  ("" "fancyhdr" t)
+                                                 ("" "booktabs" t)
+                                                 ("" "tikz" t)
                                                  "\\tolerance=1000"))
 
 (require 'org-google-weather)
@@ -285,20 +283,29 @@
 (require 'org-bullets)
 (add-hook 'org-mode-hook 'org-bullets-mode)
 
-(ido-mode t)
-(ido-everywhere 1)
-(setq ido-enable-flex-matching t) ; fuzzy matching is a must have
-(setq ido-enable-last-directory-history t) 
-(setq ido-show-dot-for-dired t)
-(setq ido-use-filename-at-point nil)
+;;(add-to-list 'org-latex-classes
+;;             '("beamer"
+;;               "\\documentclass\[presentation\]\{beamer\}"
+;;               ("\\section\{%s\}" . "\\section*\{%s\}")
+;;               ("\\subsection\{%s\}" . "\\subsection*\{%s\}")
+;;               ("\\subsubsection\{%s\}" . "\\subsubsection*\{%s\}")))
+  (setq org-export-backends (quote (
+    beamer
+    md)))
 
-(smex-initialize)
-(setq smex-save-file (concat mvr-elisp-root "/smex-persist/smex.history"))
+;;(ido-mode t)
+;;(ido-everywhere 1)
+;;(setq ido-enable-flex-matching t) ; fuzzy matching is a must have
+;;(setq ido-enable-last-directory-history t) 
+;;(setq ido-show-dot-for-dired t)
+;;(setq ido-use-filename-at-point nil)
 
-(setq ido-create-new-buffer 'always)
+;;(smex-initialize)
+;;(setq smex-save-file (concat mvr-elisp-root "/smex-persist/smex.history"))
 
-(setq ido-file-extensions-order '(".org" ".tex" ".txt" ".hs" ".lhs" ".el" ".rb"
-".cfg" ".c" ".h" ".html"))
+;;(setq ido-create-new-buffer 'always)
+
+;;(setq ido-file-extensions-order '(".org" ".tex" ".txt" ".hs" ".lhs" ".el" ".rb"".cfg" ".c" ".h" ".html"))
 
 (load "~/.ercpass.el")
    
@@ -396,7 +403,7 @@
 (eval-after-load "ispell"
    (progn
      (setq ispell-dictionary "en_US"
-           ispell-extra-args '("-a" "-c" )
+           ispell-extra-args '("-a" "-c" "--encoding=iso-8859-1" )
            ispell-silently-savep t
  )))
   (setq-default ispell-program-name "aspell")
@@ -469,30 +476,7 @@
 
 (setq reftex-toc-split-windows-horizontally t)
 
-(add-hook 'text-mode-hook 'orgtbl-mode)
-
-(require 'textlint)
-(require 'artbollocks-mode)
-
 (add-hook 'prog-mode-hook 'which-func-mode)
-
-(setq gnus-select-method '(nnimap "gmail"
-                                  (nnimap-address "imap.gmail.com")
-                                  (nnimap-server-port 993)
-                                  (nnimap-stream ssl)))
-
-(setq message-send-mail-function 'smtpmail-send-it
-      smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
-      smtpmail-auth-credentials '(("smtp.gmail.com" 587 "mvr.rennes@gmail.com" nil))
-      smtpmail-default-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587)
-
-(setq gnus-thread-sort-functions
-      '((not gnus-thread-sort-by-date) gnus-thread-sort-by-author))
-
-(setq gnus-article-sort-functions
-      '((not gnus-article-sort-by-date) gnus-article-sort-by-author))
 
 (setq eshell-prompt-function
   (lambda ()
@@ -505,10 +489,6 @@
      (eshell/pwd)
      "\n"
       (if (= (user-uid) 0) "# " "$ "))))
-
-;;(autoload 'forth-mode "gforth.el")
-;;(autoload 'forth-block-mode "gforth.el")
-;;(add-to-list 'auto-mode-alist '("\\.fs$" . forth-mode))
 
 (require 'ace-jump-mode)
 
@@ -639,15 +619,15 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
      (kbd "M-L") 'org-metaright)  
      
    (evil-leader/set-key
-     "b" 'ido-switch-buffer
-     "B" 'ibuffer
+     "b" 'helm-mini
+     "B" 'helm-mini
      "k" 'kill-this-buffer 
      "m" 'compile
      "s" 'save-buffer
-     "f" 'ido-find-file
+     "f" 'helm-find-files
      "SPC" 'ace-jump-word-mode
      "q" 'fill-paragraph
-     "x" 'smex
+     "x" 'helm-M-x
      "r" 'mvr-evil-rnu
      "R" 'mvr-evil-nu
      "l" 'linum-mode
@@ -660,7 +640,7 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
      "z" 'suspend-emacs
      "J" 'mvr-evil-break-line
      "n" 'mvr-new-scratch-buffer
-     "A" 'predictive-mode
+     "y" 'helm-show-kill-ring
      "g" 'magit-status)
 
 (evil-define-key 'normal LaTeX-mode-map "%" 'predictive-latex-jump-to-matching-delimiter)
@@ -694,38 +674,57 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 (ad-activate 'linum-update)
 
 (require 'powerline)
-(powerline-default)
-
-;; (require 'rinari)
-;;; rhtml-mode
-  ;;   (require 'rhtml-mode)
-  ;;   (add-hook 'rhtml-mode-hook
-  ;;      (lambda () (rinari-launch)))
-
-(require 'ess-site)
-
-;;(require 'auto-complete-config)
-;;(ac-config-default)
-;;(add-to-list 'ac-modes 'LaTeX-mode)
-;;(global-auto-complete-mode t)
+;;(powerline-default)
 
 ;;(defun mvr-completion-reject() (define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject))
 ;;(autoload 'predictive-mode "predictive" "predictive" t)
 ;;(add-hook 'predictive-mode 'mvr-completion-reject)
-(require 'predictive)
-(define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject)
+;;;(require 'predictive)
+;;;(define-key auto-completion-map (kbd "<ESC><ESC>") 'completion-reject)
 
-(require 'emms-setup)
-(require 'emms-player-mplayer)
-(setq emms-playlist-buffer-name "*Music*")
-(setq emms-source-file-default-directory "/Users/mvr/Music/mp3/")
-(emms-standard)
-(emms-default-players)
-;;(define-emms-simple-player mplayer '(file url)
-      ;;(regexp-opt '(".ogg" ".mp3" ".wav" ".mpg" ".mpeg" ".wmv" ".wma"
-                    ;;".mov" ".avi" ".divx" ".ogm" ".asf" ".mkv" "http://" "mms://"
-                    ;;".rm" ".rmvb" ".mp4" ".flac" ".vob" ".m4a" ".flv" ".ogv" ".pls"))
-      ;;"mplayer" "-slave" "-quiet" "-really-quiet" "-vo null")
+(autoload 'ltc-mode "ltc-mode" "" t)
+
+(require 'quickrun)
+
+(require 'smooth-scrolling)
+(setq smooth-scroll-margin 5)
+(setq scroll-conservatively 9999
+      scroll-preserve-screen-position t)
+
+(require 'helm-config)
+(require 'helm-grep)
+
+;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
+;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
+;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
+(global-set-key (kbd "C-c h") 'helm-command-prefix)
+(global-unset-key (kbd "C-x c"))
+
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebihnd tab to do persistent action
+(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
+(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+
+(when (executable-find "curl")
+  (setq helm-google-suggest-use-curl-p t))
+
+(setq helm-quick-update                     t ; do not display invisible candidates
+      helm-split-window-in-side-p           t ; open helm buffer inside current window, not occupy whole other window
+      helm-buffers-fuzzy-matching           t ; fuzzy matching buffer names when non--nil
+      helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
+      helm-ff-search-library-in-sexp        t ; search for library in `require' and `declare-function' sexp.
+      helm-scroll-amount                    8 ; scroll 8 lines other window using M-<next>/M-<prior>
+      helm-ff-file-name-history-use-recentf t)
+
+(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to do persistent action
+(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
+(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+
+(global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "M-y") 'helm-show-kill-ring)
+(global-set-key (kbd "C-x b") 'helm-mini)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
+
+(helm-mode 1)
 
 (set-face-attribute 'default nil :family "Monaco for Powerline" :height 120)
 
@@ -762,25 +761,24 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 
 (setq confirm-nonexistent-file-or-buffer nil)
 
-(require 'growl)
-
 (fringe-mode 0)
 
 ;;;;(if (eq system-type 'darwin) (funcall (lambda ()(setenv "PATH" (concat "/opt/local/bin:/usr/local/bin:" (getenv "PATH"))) (push "/opt/local/bin" exec-path))))
-          ;;(if (eq system-type 'darwin) (progn (setenv "PATH" (concat
-          ;;"/Users/mvr/.rvm/rubies/ruby-1.9.3-p194/bin/ruby:/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
-          ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
-          ;;exec-path)
-          ;;(setq exec-path (append
-          ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
-          ;;exec-path))))
-;; fix the PATH variable
-(defun set-exec-path-from-shell-PATH ()
-  (let ((path-from-shell (shell-command-to-string "$SHELL -i -c 'echo $PATH' 2>/dev/null")))
-    (setenv "PATH" path-from-shell)
-    (setq exec-path (split-string path-from-shell path-separator))))
-
-(if (eq system-type 'darwin) (set-exec-path-from-shell-PATH))
+           ;;(if (eq system-type 'darwin) (progn (setenv "PATH" (concat
+           ;;"/Users/mvr/.rvm/rubies/ruby-1.9.3-p194/bin/ruby:/opt/local/bin:/usr/local/bin:/usr/texbin/:" (getenv "PATH"))) (append
+           ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+           ;;exec-path)
+           ;;(setq exec-path (append
+           ;;(list "/opt/local/bin" "/usr/local/bin" "/usr/texbin/" "/Users/mvr/bin")
+           ;;exec-path))))
+ ;; fix the PATH variable
+ ;;(defun set-exec-path-from-shell-PATH ()
+ ;;  (let ((path-from-shell (shell-command-to-string "$SHELL -i -c 'echo $PATH' 2>/dev/null")))
+ ;;    (setenv "PATH" path-from-shell)
+ ;;    (setq exec-path (split-string path-from-shell path-separator))))
+ ;;
+ ;;(if (eq system-type 'darwin) (set-exec-path-from-shell-PATH))
+(exec-path-from-shell-initialize)
 
 (defun ns-raise-emacs ()
   (ns-do-applescript "tell application \"Emacs\" to activate"))
@@ -812,8 +810,6 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 (global-set-key (kbd "C-w") 'backward-kill-word)
 (global-set-key (kbd "C-c w") 'kill-region)
 
-(global-set-key (kbd "M-p") 'print-to-pdf)
-
 (defun zone-on ()
   (interactive)
   (zone-when-idle 60))
@@ -831,8 +827,6 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 (add-hook 'ibuffer-mode-hook (lambda () (define-key ibuffer-mode-map (kbd "M-o") 'other-window))) ; was ibuffer-visit-buffer-1-window
 (windmove-default-keybindings 'meta)
 
-(global-set-key (kbd "C-x t") 'toggle-transparency)
-
 (global-set-key (kbd "C-|") 'maximize-frame)
 (global-set-key (kbd "M-|") 'mvr-toggle-fullscreen)
 (global-set-key (kbd "C->") 'halve-frame-h)
@@ -845,17 +839,6 @@ A `spec' can be a `read-kbd-macro'-readable string or a vector."
 
 (add-hook 'LaTeX-mode-hook 'orgtbl-latex-keys)
 
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "M-X") 'smex-major-mode-commands)
-
 (global-set-key (kbd "C-M-'") 'comment-or-uncomment-region)
 
-;(global-set-key (kbd "M-]") 'bc-set)
-;(global-set-key (kbd "M-[") 'bc-previous)
-
 (global-set-key (kbd "C-{") 'er/expand-region)
-
-(global-set-key (kbd "C-M-7") 'emms-previous) 
-(global-set-key (kbd "C-M-8") 'emms-pause) 
-(global-set-key (kbd "C-M-9") 'emms-next) 
-(global-set-key (kbd "C-M-0") 'emms-stop)
